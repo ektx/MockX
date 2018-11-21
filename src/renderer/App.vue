@@ -20,11 +20,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-h1 {
-    font-size: 12px
-}
+<style lang="scss">
+@import './assets/css/reset-1.4.0.css';
+
 body {
-    background: red
+    width: 100vw;
+    height: 100vh;
 }
 </style>

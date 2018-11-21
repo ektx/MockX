@@ -1,6 +1,12 @@
+const path = require('path')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src/render/')
+        }
+    },
     module: {
         rules: [
             {
