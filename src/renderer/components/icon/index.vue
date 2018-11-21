@@ -22,7 +22,7 @@ export default {
 }
 
 .mock-icon {
-    display: block;
+    display: inline-block;
     height: 1em;
     width: 1em;
     font-size: 14px;
