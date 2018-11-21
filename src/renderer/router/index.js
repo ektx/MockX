@@ -82,7 +82,7 @@ async function registered (r) {
         } else {
             // 过滤已经存在的1级目录
             if (helpObj.hasOwnProperty(r)) return
-            // 对home处理
+            // 处理 / 目录，此项目将 project 为根目录
             path = path === '/project' ? '/' : path
 
             let data = {

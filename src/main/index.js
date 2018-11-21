@@ -1,9 +1,8 @@
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, session, ipcMain } from 'electron'
 import path from 'path'
 import { format as formatUrl } from 'url'
-import Koa from 'koa'
+import './serve.js'
 
-const serve = new Koa()
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // 创建一个全局的窗口对象，方便我们对它进行管理
@@ -67,9 +66,3 @@ app.on('activate', () => {
         createWindow()
     }
 })
-
-serve.use(ctx => {
-    ctx.body = 'hello koa'
-})
-
-serve.listen(3000)

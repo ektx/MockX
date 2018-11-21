@@ -69,6 +69,8 @@ body {
 
 .navs-list {
     margin: 20px 0;
+    user-select: none;
+    
     a {
         display: block;
         margin: 0 0 20px;
