@@ -14,11 +14,11 @@ export default {
 <style lang="scss">
 @font-face {
     font-family: 'mockx';  /* project id 928233 */
-    src: url('//at.alicdn.com/t/font_928233_dzn779o84xb.eot');
-    src: url('//at.alicdn.com/t/font_928233_dzn779o84xb.eot?#iefix') format('embedded-opentype'),
-    url('//at.alicdn.com/t/font_928233_dzn779o84xb.woff') format('woff'),
-    url('//at.alicdn.com/t/font_928233_dzn779o84xb.ttf') format('truetype'),
-    url('//at.alicdn.com/t/font_928233_dzn779o84xb.svg#mockx') format('svg');
+    src: url('../../assets/font/iconfont.eot');
+    src: url('../../assets/font/iconfont.eot?#iefix') format('embedded-opentype'),
+    url('../../assets/font/iconfont.woff') format('woff'),
+    url('../../assets/font/iconfont.ttf') format('truetype'),
+    url('../../assets/font/iconfont.svg#mockx') format('svg');
 }
 
 .mock-icon {
