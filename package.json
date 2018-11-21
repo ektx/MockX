@@ -9,13 +9,15 @@
   "author": "ektx",
   "license": "MIT",
   "dependencies": {
-    "source-map-support": "^0.5.9",
-    "sqlite3": "^4.0.4"
+    "source-map-support": "^0.5.9"
   },
   "devDependencies": {
     "electron": "^3.0.9",
     "electron-builder": "^20.36.2",
     "electron-webpack": "2.3.1",
+    "element-ui": "^2.4.10",
+    "koa": "^2.6.2",
+    "sqlite3": "^4.0.4",
     "vue": "^2.5.17",
     "vue-loader": "^15.4.2",
     "vue-template-compiler": "^2.5.17",
