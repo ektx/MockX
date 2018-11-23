@@ -43,7 +43,8 @@ export default {
 
 $icons:
     app '\e605',
-    browser '\e606'
+    browser '\e606',
+    file '\e61a'
 ;
 
 @each $icon in $icons {

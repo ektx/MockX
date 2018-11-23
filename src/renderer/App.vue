@@ -32,6 +32,11 @@ export default {
                     to: '/server',
                     icon: 'browser'
                 },
+                {
+                    label: '数据库',
+                    to: '/database',
+                    icon: 'file'
+                },
             ]
         }
     },
