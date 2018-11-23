@@ -36,7 +36,7 @@
 
 <script>
 import os from 'os'
-import { ipcRenderer, ipcMain } from 'electron'
+import { ipcRenderer } from 'electron'
 
 export default {
     name: 'server-view',

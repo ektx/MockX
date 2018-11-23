@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, ipcMain } from 'electron'
+import { app, BrowserWindow, session } from 'electron'
 import path from 'path'
 import { format as formatUrl } from 'url'
 import './serve.js'

@@ -2,6 +2,10 @@ const path = require('path')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
+    target: 'node',
+    externals: {
+        sqlite3: 'commonjs sqlite3'
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src/render/')
@@ -11,10 +15,7 @@ module.exports = {
         rules: [
             {
                 test: /\.vue$/,
-                use: 'vue-loader',
-                options: {
-                    loaders
-                }
+                use: 'vue-loader'
             },
             {
                 test: /\.scss$/,
@@ -32,9 +33,5 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin()
-    ],
-    // externals: {
-    //     sqlite3: 'commonjs sqlite3',
-    //     express: 'commonjs express'
-    // }
+    ]
 }
