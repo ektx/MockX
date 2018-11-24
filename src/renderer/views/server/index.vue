@@ -63,13 +63,13 @@ export default {
         this.params.ipv4 = os.networkInterfaces().en0[1].address
 
         // 响应启动服务器结果
-        ipcRenderer.on('start-serve-result', (evt, arg) => {
+        ipcRenderer.on('START_SERVE_RESULT', (evt, arg) => {
             this.loaded = !arg
             this.serve = arg
         })
 
         // 响应关闭服务器结果 
-        ipcRenderer.on('stop-serve-result', (evt, arg) => {
+        ipcRenderer.on('STOP_SERVE_RESULT', (evt, arg) => {
             this.loaded = arg
             this.serve = arg
         })
@@ -79,7 +79,7 @@ export default {
             this.$refs.form.validate(valid => {
                 if (valid) {
                     this.loaded = true
-                    ipcRenderer.send('start-serve', this.params)
+                    ipcRenderer.send('START_SERVE', this.params)
                 } else {
                     return false
                 }
@@ -90,7 +90,7 @@ export default {
         },
         closeServe () {
             this.loaded = true
-            ipcRenderer.send('stop-serve', true)
+            ipcRenderer.send('STOP_SERVE', true)
         }
     }
 }
