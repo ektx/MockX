@@ -2,10 +2,10 @@
     <div class="mock-app">
         <aside class="mock-aside-mod">
             <nav class="navs-list">
-                <router-link v-for="nav in navs" :key="nav.icon" :to="nav.to">
+                <a v-for="nav in navs" :key="nav.icon" :class="nav.classes" @click="setActive(nav)">
                     <icon :class="nav.icon"/>
                     <p>{{nav.label}}</p>
-                </router-link>
+                </a>
             </nav>
         </aside>
         <main class="mock-main-display">
@@ -24,24 +24,39 @@ export default {
             navs: [
                 {
                     label: '项目',
-                    to: '/',
-                    icon: 'app'
+                    to: '/project/list',
+                    icon: 'app',
+                    classes: 'active'
                 },
                 {
                     label: '服务器',
                     to: '/server',
-                    icon: 'browser'
+                    icon: 'browser',
+                    classes: ''
                 },
                 {
                     label: '数据库',
                     to: '/database',
-                    icon: 'file'
+                    icon: 'file',
+                    classes: ''
                 },
-            ]
+            ],
+            current: null
         }
     },
     mounted () {
         document.title = this.name
+        this.$router.push('/project/list')
+    },
+    methods: {
+        setActive (nav) {
+            if (this.current) {
+                this.current.classes = ''
+            }
+            nav.classes = 'active'
+            this.current = nav
+            this.$router.push(nav.to)
+        }
     }
 }
 </script>
@@ -60,6 +75,7 @@ body {
     display: flex;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
 
     aside {
         width: 70px;
@@ -90,7 +106,7 @@ body {
             margin: 5px 0 0;
         }
 
-        &.router-link-exact-active {
+        &.active {
             color: #09f;
         }
     }

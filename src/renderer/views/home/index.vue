@@ -1,7 +1,5 @@
 <template>
-    <div class="home-view">
-        Home
-    </div>
+    <div class="home-view"></div>
 </template>
 
 
@@ -14,11 +12,7 @@ export default {
         }
     },
     mounted () {
+        this.$router.push('/project/list')
     }
 }
 </script>
-
-<style lang="scss" scoped>
-.home-view {
-}
-</style>
