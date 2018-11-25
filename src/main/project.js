@@ -14,7 +14,7 @@ let db = new Datastore({
  * @param {arguments} arg 参数
  */
 function getProjects (evt, arg) {
-    db.find({}, (err, docs) => {
+    db.find({}).sort({ctime: -1}).exec((err, docs) => {
         if (err) return
 
         evt.sender.send('GET_PROJECTS_RESULT', {
