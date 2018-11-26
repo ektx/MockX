@@ -11,7 +11,9 @@ let win
 function createWindow() {
     // 创建窗口
     win = new BrowserWindow({
-        width: 800
+        width: 800,
+        minWidth: 500,
+        minHeight: 300
     })
 
     // 判断开发与生产

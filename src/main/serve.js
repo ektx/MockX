@@ -4,17 +4,7 @@ import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
 import project from './project.js'
-console.log(project)
-let db = {}
-db.apis = new Datastore({
-    filename: path.join(os.homedir(), 'mock-x/db/apis.db'),
-    autoload: true
-})
-
-// console.log(Database)
-
-
-
+import apis from './apis.js'
 
 const app = express()
 let serve
