@@ -1,17 +1,19 @@
 import { ipcMain } from 'electron'
 import express from 'express'
-import Datastore from 'nedb'
-import path from 'path'
-import os from 'os'
+import bodyParser from 'body-parser'
 import project from './project.js'
 import apis from './apis.js'
 
 const app = express()
+
 let serve
 
-app.get('*', (req, res) => {
-    res.send('hello')
-})
+app.use(bodyParser.urlencoded({
+    extended: true, 
+    limit: '50mb'
+}))
+
+app.get('/:baseUrl/:url',  apis.getData)
 
 // 接受客户端启动服务器命令
 ipcMain.on('START_SERVE', (evt, arg) => {

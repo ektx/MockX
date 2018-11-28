@@ -5,11 +5,32 @@ import os from 'os'
 
 let db = new Datastore({
     filename: path.join(os.homedir(), 'mock-x/db/apis.db'),
-    autoload: true
+    autoload: true,
+    timestampData: true
 })
 
 ipcMain.on('SAVE_API', (evt, arg) => {
     console.log(arg)
+    /*
+    { 
+        // API url
+        url: 'abc' 
+        // 项目URL
+        baseUrl: 'project1543286900089',
+        // 简介
+        description: '',
+        // 请求方式
+        method: 'get',
+        // mock 数据
+        mock: '{\n    a: 1\n}',
+        // 
+        params: [],
+        // 项目ID
+        projectId: 'mZ6YvR6eYBp1yGeM',
+    }
+    */
+
+    // 查寻当前项目是否已经有了此API
     db.findOne({projectId: arg.projectId, url: arg.url}, (err, doc) => {
         if (err) return
 
@@ -19,10 +40,6 @@ ipcMain.on('SAVE_API', (evt, arg) => {
                 message: '此 API 已经存在'
             })
         } else {
-            Object.assign(arg, {
-                ctime: new Date
-            })
-            
             db.insert(arg, (err, docs) => {
                 if (err) return
         
@@ -45,3 +62,27 @@ ipcMain.on('GET_ALL_APIS', (evt, arg) => {
         })
     })
 })
+
+
+function getData (req, res) {
+    console.log(req.body)
+    console.log(req.params)
+
+    db.findOne(req.params, (err, doc) => {
+        console.log(doc)
+        if (err) {
+            res.send({
+                success: false,
+                message: err
+            })
+            return
+        }
+
+        res.send(doc)
+    })
+}
+
+
+export default {
+    getData
+}
