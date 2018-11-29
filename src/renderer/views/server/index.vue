@@ -4,7 +4,7 @@
         <p class="info">服务器启动信息(请不要频繁开关你的服务器!)。</p>
 
         <el-form 
-            v-if="!serve"
+            v-if="!params.status"
             :model="params" 
             :rules="rules" 
             label-width="80px" 
@@ -13,7 +13,7 @@
             class="my-form"
         >
             <el-form-item label="网址" prop="ipv4">
-                <el-input v-model="params.ipv4"/>
+                <el-input v-model="params.host"/>
             </el-form-item>
             <el-form-item label="端口" prop="port">
                 <el-input v-model="params.port"/>
@@ -23,11 +23,10 @@
                 <el-button @click="resetForm" :disabled="loaded">重置</el-button>
             </el-form-item>
         </el-form>
-
         <div class="serve-info" v-else>
             <div class="serve-link">
                 <p>本地：<input type="text" :value="`localhost:${params.port}`" readonly></p>
-                <p>网络：<input type="text" :value="`${params.ipv4}:${params.port}`" readonly></p>
+                <p>网络：<input type="text" :value="`${params.host}:${params.port}`" readonly></p>
             </div>
             <el-button :loading="loaded" @click="closeServe" size="mini">关闭服务器</el-button>
         </div>
@@ -37,15 +36,16 @@
 <script>
 import os from 'os'
 import { ipcRenderer } from 'electron'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
     name: 'server-view',
     data () {
         return {
-            serve: false,
             params: {
-                ipv4: '0.0.0.0',
+                host: '0.0.0.0',
                 port: 8200,
+                status: false
             },
             loaded: false,
             rules: {
@@ -59,22 +59,32 @@ export default {
             }
         }
     },
+    watch: {
+        params: {
+            handler (val) {
+                this.setHostInfo(val)
+            },
+            deep: true
+        } 
+    },
     mounted () {
-        this.params.ipv4 = os.networkInterfaces().en0[1].address
+        this.params.host = os.networkInterfaces().en0[1].address
 
         // 响应启动服务器结果
         ipcRenderer.on('START_SERVE_RESULT', (evt, arg) => {
             this.loaded = !arg
-            this.serve = arg
+            this.params.status = arg
         })
 
         // 响应关闭服务器结果 
         ipcRenderer.on('STOP_SERVE_RESULT', (evt, arg) => {
             this.loaded = arg
-            this.serve = arg
+            this.params.status = arg
         })
     },
     methods: {
+        ...mapMutations('server', ['setHostInfo']),
+
         submitForm () {
             this.$refs.form.validate(valid => {
                 if (valid) {

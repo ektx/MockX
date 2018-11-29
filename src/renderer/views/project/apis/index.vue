@@ -28,6 +28,29 @@
             </ul>
         </aside>
         <main>
+            <header>
+                <h1>{{current.url}}</h1>
+                <div class="set-box">
+                    <el-button-group>
+                        <el-button size="mini" @click="goList">返回</el-button>
+                        <el-button size="mini">预览</el-button>
+                    </el-button-group>
+                    
+                    <el-dropdown class="set-list" @click="copyUrl('min')" size="mini" split-button @command="copyUrl" >
+                        复制
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="ip">IP路径</el-dropdown-item>
+                            <el-dropdown-item command="local">本地路径</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-dropdown class="set-list" size="mini" split-button >
+                        编辑
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item>删除</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </div>
+            </header>
             <ul class="api-info">
                 <li 
                     v-for="(item, index) in apiFormat"
@@ -37,13 +60,13 @@
                     <span>{{item.value}}</span>
                 </li>
             </ul>
-            <codeMirror v-model="current.mock" :option="codeOption"/>
         </main>
     </section>
 </template>
 
 <script>
 import { ipcRenderer } from 'electron'
+import { mapState } from 'vuex'
 
 export default {
     name: 'apis-view',
@@ -56,12 +79,16 @@ export default {
             current: {},
             apiFormat: [
                 {
-                    label: 'Request URL',
+                    label: 'URL',
                     key: ['baseUrl', 'url']
                 },
                 {
-                    label: 'Request Method',
+                    label: 'Method',
                     key: 'method'
+                },
+                {
+                    label: '描述',
+                    key: 'description'
                 }
             ],
             // 代码显示配置
@@ -71,6 +98,9 @@ export default {
 				mode: 'javascript'
             }
         }
+    },
+    computed: {
+        ...mapState('server', ['host', 'port'])
     },
     watch: {
         current (val, old) {
@@ -114,17 +144,41 @@ export default {
         formatData () {
             this.apiFormat.forEach(item => {
                 if (Array.isArray(item.key)) {
-                    item.value = []
-
-                    item.key.forEach(keyItem => {
-                        item.value.push(this.current[keyItem])
+                    item.value = item.key.reduce((a, b) => {
+                        return `${this.current[a]}/${this.current[b]}`
                     })
-
-                    item.value = item.value.join('/')
                 } else {
                     item.value = this.current[item.key]
                 }
             })
+        },
+
+        goList () {
+            this.$router.push({name: 'projectList'})
+        },
+
+        copyUrl (type) {
+            let host = ''
+            switch (type) {
+                case 'ip': 
+                    host = `http://${this.host}:${this.port}`; 
+                    break;
+                case 'local':
+                    host = `http://localhost:${this.port}`;
+                    break
+            }
+
+            let url = `${host}/${this.current.baseUrl}/${this.current.url}`
+
+            navigator.clipboard
+                .writeText(url)
+                .then(() => {
+                    this.$message.success('复制成功')
+                })
+                .catch(err => {
+                    this.$message.error(`Could not copy text: ${err}`)
+                })
+           
         }
     }
 }
@@ -150,6 +204,44 @@ export default {
 
     main {
         flex: 2.5;
+
+        header {
+            display: flex;
+            flex-direction: column;
+
+            h1 {
+                flex: 1;
+                margin: 20px 10px 0 10px;
+                font-size: 18px;
+                font-weight: 400;
+            }
+            .set-box {
+                margin: 10px;
+            
+                .back-list {
+                    width: 24px;
+                    height: 24px;
+                    color: #777;
+                    text-align: center;
+                    line-height: 24px;
+                    border-radius: 100%;
+                    border: 1px solid #ddd;
+                    cursor: pointer;
+                    transition: 
+                        border-color .3s ease-in-out,
+                        background-color .3s ease-in-out;
+
+                    &:hover {
+                        border-color: #ccc;
+                        background-color: #f5f5f5;
+                    }
+                }
+
+                .set-list {
+                    vertical-align: middle;
+                }
+            }
+        }
     }
 }
 
@@ -192,4 +284,14 @@ export default {
     }
 }
 
+.api-info {
+    margin: 10px;
+    font-size: 13px;
+    line-height: 24px;
+
+    label {
+        color: #777;
+        margin-right: 3px;
+    }
+}
 </style>

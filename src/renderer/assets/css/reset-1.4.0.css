@@ -17,7 +17,7 @@
  * 3. 平滑字体，具体可以参考：https://www.zhangxinxu.com/wordpress/2017/02/font-kerning-font-smoothing-font-variant/
  */
 html {
-	font: 12px "Microsoft Yahei","HanHei SC","PingHei","PingFang SC","STHeitiSC-Light","Helvetica Neue","Helvetica","Arial",sans-serif; /* 1 */
+	font: 12px "mockx","Microsoft Yahei","HanHei SC","PingHei","PingFang SC","STHeitiSC-Light","Helvetica Neue","Helvetica","Arial",sans-serif; /* 1 */
 	-webkit-text-size-adjust: 100%; /* 2 */
 	-webkit-font-smoothing: antialiased; /* 3 */
 	-moz-osx-font-smoothing: grayscale; /* 3 */

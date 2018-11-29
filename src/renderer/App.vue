@@ -2,7 +2,7 @@
     <div class="mock-app">
         <aside class="mock-aside-mod">
             <nav class="navs-list">
-                <a v-for="nav in navs" :key="nav.icon" :class="nav.classes" @click="setActive(nav)">
+                <a v-for="nav in navs" :key="nav.icon" :class="nav.classes" @click="current = nav">
                     <icon :class="nav.icon"/>
                     <p>{{nav.label}}</p>
                 </a>
@@ -25,38 +25,38 @@ export default {
                 {
                     label: '项目',
                     to: '/project/list',
-                    icon: 'app',
-                    classes: 'active'
+                    icon: 'icon-app'
                 },
                 {
                     label: '服务器',
                     to: '/server',
-                    icon: 'browser',
-                    classes: ''
+                    icon: 'icon-browser'
                 },
                 {
                     label: '数据库',
                     to: '/database',
-                    icon: 'file',
-                    classes: ''
+                    icon: 'icon-file'
                 },
             ],
             current: null
         }
     },
+    watch: {
+        current (val, old) {
+            if (old) old.classes = ''
+
+            if (val.classes) val.classes = 'active'
+            else this.$set(val, 'classes', 'active')
+
+            this.$router.push(val.to)
+        }
+    },
     mounted () {
         document.title = this.name
-        this.$router.push('/project/list')
+        this.current = this.navs[0]
     },
     methods: {
-        setActive (nav) {
-            if (this.current) {
-                this.current.classes = ''
-            }
-            nav.classes = 'active'
-            this.current = nav
-            this.$router.push(nav.to)
-        }
+        
     }
 }
 </script>
