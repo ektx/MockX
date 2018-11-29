@@ -1,7 +1,7 @@
 <template>
     <section class="api-edit-mod">
         <header>
-            <h1>API Edit</h1>
+            <h1>API Mock</h1>
         </header>
         <section>
             <aside>
@@ -15,7 +15,6 @@
                 />
             </aside>
             <main>
-                {{params}}
                 <codeMirror v-model="params.mock" :option="codeOption"/>
             </main>
         </section>
@@ -24,6 +23,8 @@
 
 <script>
 import { ipcRenderer } from 'electron'
+import { open } from 'fs';
+let option 
 
 export default {
     name: 'api-edit-view',
@@ -59,6 +60,25 @@ export default {
                     label: '请求参数',
                     key: 'params',
                     type: 'addObject'
+                },
+                {
+                    label: '数据类型',
+                    key: 'mockType',
+                    type: 'select',
+                    options: [
+                        {
+                            label: 'JSON',
+                            value: 'json'
+                        },
+                        {
+                            label: 'JS',
+                            value: 'js'
+                        },
+                        {
+                            label: 'Text',
+                            value: 'txt'
+                        }
+                    ]
                 }
             ],
             params: {
@@ -66,7 +86,8 @@ export default {
                 method: '',
                 description: '',
                 params: [],
-                mock: ''
+                mock: '',
+                mockType: 'json'
             },
             rules: {
                 url: [
@@ -107,9 +128,22 @@ export default {
     },
     methods: {
         submit () {
+            console.log(this.params)
+            switch (this.params.mockType) {
+                case 'js':
+                    option = eval(this.params.mock);
+                    break;
+                case 'json':
+                    option = eval(`(${this.params.mock})`);
+                    break;
+                default:
+                    option = this.params.mock
+            }
+
             Object.assign(this.params, {
                 projectId: this.$route.params._id,
-                baseUrl: this.$route.params.baseUrl
+                baseUrl: this.$route.params.baseUrl,
+                json: option
             })
 
             ipcRenderer.send('SAVE_API', this.params)
@@ -133,9 +167,11 @@ export default {
     section {
         flex: 1;
         display: flex;
+        overflow: hidden;
 
         aside {
             width: 40%;
+            max-width: 300px;
             height: 100%;
             padding: 20px 20px;
             overflow: auto;

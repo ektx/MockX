@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
+import mock from '../common/mocks/index.js'
 
 let db = new Datastore({
     filename: path.join(os.homedir(), 'mock-x/db/apis.db'),
@@ -23,6 +24,10 @@ ipcMain.on('SAVE_API', (evt, arg) => {
         method: 'get',
         // mock 数据
         mock: '{\n    a: 1\n}',
+        mockType: ['Js', 'JSON', 'txt']
+            Js 与 json 都会为你mock数据
+            txt 直接返回内容
+        json 生成数据使用
         // 
         params: [],
         // 项目ID
@@ -53,7 +58,7 @@ ipcMain.on('SAVE_API', (evt, arg) => {
 })
 
 ipcMain.on('GET_ALL_APIS', (evt, arg) => {
-    db.find({projectId: arg.id}).sort().exec((err, docs) => {
+    db.find({projectId: arg.id}).sort({updatedAt: -1}).exec((err, docs) => {
         if (err) return
 
         evt.sender.send('GET_ALL_APIS_RESULT', {
@@ -65,11 +70,14 @@ ipcMain.on('GET_ALL_APIS', (evt, arg) => {
 
 
 function getData (req, res) {
-    console.log(req.body)
-    console.log(req.params)
+    let query = Object.assign({}, {
+        url: req.params[0],
+        baseUrl: req.params.baseUrl
+    })
 
-    db.findOne(req.params, (err, doc) => {
-        console.log(doc)
+    db.findOne(query, (err, doc) => {
+        let data = `This API Not Find!`
+
         if (err) {
             res.send({
                 success: false,
@@ -78,7 +86,12 @@ function getData (req, res) {
             return
         }
 
-        res.send(doc)
+        if (doc) {
+            data = doc.mockType === 'txt' ? 
+                doc.json : mock(doc.json) 
+        } 
+
+        res.send(data)
     })
 }
 

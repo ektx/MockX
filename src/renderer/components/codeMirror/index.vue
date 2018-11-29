@@ -74,7 +74,7 @@ export default {
         height: 100%;
     
         pre {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
         }
     }

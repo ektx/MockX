@@ -12,7 +12,6 @@
                     <el-button slot="append" icon="el-icon-plus" @click="addApi"></el-button>
                 </el-input>
             </header>
-            {{current}}
             <ul class="apis-list">
                 <li 
                     v-for="api in list" 
@@ -23,7 +22,7 @@
                     <div class="url">{{api.url}}</div>
                     <div>
                         <span :class="['method',api.method]">{{api.method}}</span>
-                        <span v-if="api.isMock" class="is-mock">MOCK</span>
+                        <span class="mock-type">{{api.mockType}}</span>
                     </div>
                 </li>
             </ul>
@@ -181,8 +180,10 @@ export default {
             }
         }
 
-        .is-mock {
-            color: #777;
+        .mock-type {
+            margin: 0 0 0 5px;
+            color: #666;
+            text-transform: uppercase;
         }
 
         &.hold {

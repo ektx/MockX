@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({
     limit: '50mb'
 }))
 
-app.get('/:baseUrl/:url',  apis.getData)
+app.get('/:baseUrl/*',  apis.getData)
 
 // 接受客户端启动服务器命令
 ipcMain.on('START_SERVE', (evt, arg) => {
