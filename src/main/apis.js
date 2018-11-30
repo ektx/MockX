@@ -11,7 +11,6 @@ let db = new Datastore({
 })
 
 ipcMain.on('SAVE_API', (evt, arg) => {
-    console.log(arg)
     /*
     { 
         // API url
@@ -36,25 +35,28 @@ ipcMain.on('SAVE_API', (evt, arg) => {
     */
 
     // 查寻当前项目是否已经有了此API
-    db.findOne({projectId: arg.projectId, url: arg.url}, (err, doc) => {
-        if (err) return
+    db.findOne(
+        {projectId: arg.projectId, url: arg.url}, 
+        (err, doc) => {
+            if (err) return
 
-        if (doc) {
-            evt.sender.send('SAVE_API_RESULT', {
-                success: false,
-                message: '此 API 已经存在'
-            })
-        } else {
-            db.insert(arg, (err, docs) => {
-                if (err) return
-        
+            if (doc) {
                 evt.sender.send('SAVE_API_RESULT', {
-                    success: true,
-                    message: '添加完成'
+                    success: false,
+                    message: '此 API 已经存在'
                 })
-            })
+            } else {
+                db.insert(arg, (err, docs) => {
+                    if (err) return
+            
+                    evt.sender.send('SAVE_API_RESULT', {
+                        success: true,
+                        message: '添加完成'
+                    })
+                })
+            }
         }
-    })
+    )
 })
 
 ipcMain.on('GET_ALL_APIS', (evt, arg) => {
@@ -66,6 +68,25 @@ ipcMain.on('GET_ALL_APIS', (evt, arg) => {
             data: docs
         })
     })
+})
+
+ipcMain.on('UPDATE_API', (evt, arg) => {
+    db.update(
+        {_id: arg._id},
+        {$set: {
+            description: arg.description,
+            method: arg.method,
+            params: arg.params,
+            mockType: arg.mockType,
+            mock: arg.mock
+        }},
+        (err, numberOfUpdated) => {
+            let success = true
+            if (err) success = false
+
+            evt.sender.send('UPDATE_API_RESULT', {success})
+        }
+    )
 })
 
 

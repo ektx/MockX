@@ -43,7 +43,7 @@
                             <el-dropdown-item command="local">本地路径</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
-                    <el-dropdown class="set-list" size="mini" split-button >
+                    <el-dropdown class="set-list" size="mini" split-button @click="editApi">
                         编辑
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item>删除</el-dropdown-item>
@@ -130,8 +130,15 @@ export default {
     methods: {
         addApi () {
             this.$router.push({
-                name: 'addApi',
+                name: 'editAPI',
                 params: this.$route.params
+            })
+        },
+
+        editApi () {
+            this.$router.push({
+                name: 'editAPI',
+                params: this.current
             })
         },
 

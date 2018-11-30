@@ -15,7 +15,7 @@
                 />
             </aside>
             <main>
-                <codeMirror v-model="params.mock" :option="codeOption"/>
+                <codeMirror ref="code" v-model="params.mock" :option="codeOption"/>
             </main>
         </section>
     </section>
@@ -30,6 +30,8 @@ export default {
     name: 'api-edit-view',
     data () {
         return {
+            // 默认是添加状态
+            type: 'add',
             data: [
                 {
                     label: 'URL',
@@ -116,19 +118,27 @@ export default {
     },
     mounted () {
         ipcRenderer.on('SAVE_API_RESULT', (evt, res) => {
-            if (res.success) {
-                this.$message({
-                    message: res.message,
-                    type: 'success'
-                })
-            } else {
-                this.$message.error(res.message)
-            }
+            if (res.success) this.$message.success('保存成功')
+            else this.$message.error('保存失败')
         })
+
+        ipcRenderer.on('UPDATE_API_RESULT', (evt, res) => {
+            if (res.success) this.$message.success('更新成功')
+            else this.$message.error('更新失败')
+        })
+
+        // 处理是否是编辑状态
+        if (this.$route.params.json) {
+            this.type = 'edit'
+
+            Object.assign(this.params, this.$route.params)
+
+            // 设置代码回显
+            this.$refs.code.setValue(this.params.mock)
+        }
     },
     methods: {
         submit () {
-            console.log(this.params)
             switch (this.params.mockType) {
                 case 'js':
                     option = eval(this.params.mock);
@@ -139,14 +149,24 @@ export default {
                 default:
                     option = this.params.mock
             }
+            
+            // 设置 mock json
+            this.params.json = option
+            this.type === 'add' ? this.add() : this.update()
+        },
 
+        save () {
             Object.assign(this.params, {
                 projectId: this.$route.params._id,
-                baseUrl: this.$route.params.baseUrl,
-                json: option
+                baseUrl: this.$route.params.baseUrl
             })
 
             ipcRenderer.send('SAVE_API', this.params)
+        },
+
+        update () {
+            console.warn(this.params)
+            ipcRenderer.send('UPDATE_API', this.params)
         }
     }
 }

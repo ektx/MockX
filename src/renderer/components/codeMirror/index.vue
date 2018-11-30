@@ -62,6 +62,12 @@ export default {
         this.codeBox.on('keyup', (instance, event)=> {
             this.$emit('input', instance.doc.getValue())
         })
+    },
+    methods: {
+        // 设置代码
+        setValue (val) {
+            this.codeBox.setValue(val)
+        }
     }
 }
 </script>
