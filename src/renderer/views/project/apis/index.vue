@@ -33,7 +33,7 @@
                 <div class="set-box">
                     <el-button-group>
                         <el-button size="mini" @click="goList">返回</el-button>
-                        <el-button size="mini">预览</el-button>
+                        <el-button size="mini" @click="preview = !preview">预览</el-button>
                     </el-button-group>
                     
                     <el-dropdown class="set-list" @click="copyUrl('min')" size="mini" split-button @command="copyUrl" >
@@ -61,12 +61,22 @@
                 </li>
             </ul>
         </main>
+
+        <el-dialog
+            title="预览"
+            :visible.sync="preview"
+            width="90%"
+            height="80%"
+        >
+            <codeMirror v-model="code" :option="codeOption"/>
+        </el-dialog>
     </section>
 </template>
 
 <script>
 import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
+import mock from '../../../../common/mocks/index.js'
 
 export default {
     name: 'apis-view',
@@ -96,7 +106,9 @@ export default {
 				lineNumbers: false,
 				readOnly: true,
 				mode: 'javascript'
-            }
+            },
+            preview: false,
+            code: ''
         }
     },
     computed: {
@@ -113,6 +125,17 @@ export default {
             }
 
             this.formatData()
+        },
+
+        preview (val) {
+            if (val) {
+                this.$nextTick(() => {
+                    if (this.current.mockType !== 'txt')
+                        this.code = JSON.stringify(mock(this.current.json), '', '\t')
+                    else 
+                        this.code = this.current.mock
+                })
+            }
         }
     },
     mounted () {
