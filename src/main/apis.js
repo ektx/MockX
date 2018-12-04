@@ -27,8 +27,8 @@ ipcMain.on('SAVE_API', (evt, arg) => {
             Js 与 json 都会为你mock数据
             txt 直接返回内容
         json 生成数据使用
-        // 
-        params: [],
+        // 头部参数与内容
+        headers: [],
         // 项目ID
         projectId: 'mZ6YvR6eYBp1yGeM',
     }
@@ -76,9 +76,10 @@ ipcMain.on('UPDATE_API', (evt, arg) => {
         {$set: {
             description: arg.description,
             method: arg.method,
-            params: arg.params,
+            headers: arg.headers,
             mockType: arg.mockType,
-            mock: arg.mock
+            mock: arg.mock,
+            json: arg.json
         }},
         (err, numberOfUpdated) => {
             let success = true
@@ -116,7 +117,14 @@ function getData (req, res) {
     })
 }
 
+function postData (req, res) {
+    console.log(req.body)
+
+    res.send('sss')
+}
+
 
 export default {
-    getData
+    getData,
+    postData
 }

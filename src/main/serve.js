@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.get('/:baseUrl/*',  apis.getData)
+app.post('/:baseUrl/*', apis.postData)
 
 // 接受客户端启动服务器命令
 ipcMain.on('START_SERVE', (evt, arg) => {
