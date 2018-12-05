@@ -77,6 +77,7 @@
 import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
 import mock from '../../../../common/mocks/index.js'
+import date from '../../../../common/mocks/core/dateTime.js';
 
 export default {
     name: 'apis-view',
@@ -116,9 +117,9 @@ export default {
     },
     watch: {
         current (val, old) {
-            if ('classes' in old) old.classes = ''
+            if (old.hasOwnProperty('classes')) old.classes = ''
 
-            if ('classes' in val) {
+            if (val.hasOwnProperty('classes')) {
                 val.classes = 'hold'
             } else {
                 this.$set(val, 'classes', 'hold')
@@ -143,8 +144,10 @@ export default {
 
         ipcRenderer.on('GET_ALL_APIS_RESULT', (evt, res) => {
             if (res.success) {
-                this.list = res.data
-                this.current = this.list[0]
+                if (res.data.length) {
+                    this.list = res.data
+                    this.current = this.list[0]
+                }
             } else {
                 this.$message.error(res.message)
             }
