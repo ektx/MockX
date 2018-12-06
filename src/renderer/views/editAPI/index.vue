@@ -2,7 +2,11 @@
     <section class="api-edit-mod">
         <header>
             <h1>API Mock</h1>
-            {{this.params}}
+
+            <div class="set-box">
+                <el-button size="mini" @click="cancel">取消</el-button>
+                <el-button size="mini" type="primary" @click="submitForm">保存</el-button>
+            </div>
         </header>
         <section>
             <aside>
@@ -12,6 +16,7 @@
             </aside>
             <main>
                 <MForm
+                    ref="form"
                     v-show="currentNav.key === 'baseInfo'"
                     v-model="params"
                     :data="data"
@@ -214,6 +219,10 @@ export default {
             this.type === 'add' ? this.save() : this.update()
         },
 
+        submitForm () {
+            this.$refs.form.submitEvt()
+        },
+
         save () {
             Object.assign(this.params, {
                 projectId: this.$route.params._id,
@@ -233,6 +242,10 @@ export default {
             // 标记选择中
             this.params.mockType = type.value
             console.log(type)
+        },
+
+        cancel () {
+            this.$router.go(-1)
         }
     }
 }
@@ -246,8 +259,22 @@ export default {
     overflow: auto;
 
     header {
+        display: flex;
         min-height: 60px;
+        padding: 0 10px;
+        align-items: center;
+        user-select: none;
         border-bottom: 1px solid #eee;
+
+        h1 {
+            flex: 1
+        }
+
+        .set-box {
+            .el-button+.el-button {
+                margin-left: 5px;
+            }
+        }
     }
 
     section {

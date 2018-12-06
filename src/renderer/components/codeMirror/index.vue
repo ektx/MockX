@@ -1,8 +1,5 @@
 <template>
-<div>
-{{myOption}}
     <div class="v-code-moirror-box"></div>
-</div>
 </template>
 
 <script>
