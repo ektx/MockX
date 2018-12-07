@@ -67,8 +67,8 @@
             :visible.sync="preview"
             width="90%"
             height="80%"
-        >
-            <codeMirror v-model="code" :option="codeOption"/>
+        >   
+            <aceCode v-model="code" :options="aceOptions"/>
         </el-dialog>
     </section>
 </template>
@@ -85,6 +85,8 @@ export default {
     },
     data () {
         return {
+            // 当前项目
+            project: JSON.parse(localStorage.project),
             search: '',
             list: [],
             current: {},
@@ -107,6 +109,10 @@ export default {
 				lineNumbers: false,
 				readOnly: true,
 				mode: 'javascript'
+            },
+            aceOptions: {
+                mode: 'javascript',
+                readOnly: true
             },
             preview: false,
             code: ''
@@ -157,7 +163,7 @@ export default {
         addApi () {
             this.$router.push({
                 name: 'editAPI',
-                params: this.$route.params
+                params: this.project
             })
         },
 
@@ -170,7 +176,7 @@ export default {
 
         getAPIs () {
             ipcRenderer.send('GET_ALL_APIS', {
-                id: this.$route.params._id
+                id: this.project._id
             })
         },
 
@@ -213,6 +219,11 @@ export default {
                 })
            
         }
+    },
+    beforeRouteLeave (to, from , next) {
+        ipcRenderer.removeAllListeners('GET_ALL_APIS_RESULT')
+
+        next()
     }
 }
 </script>
@@ -327,4 +338,13 @@ export default {
         margin-right: 3px;
     }
 }
+
 </style>
+
+<style lang="scss">
+.el-dialog__body {
+    height: 50vh;
+}
+
+</style>
+

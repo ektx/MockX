@@ -6,7 +6,6 @@
             <div class="set-box">
                 <el-button size="mini" @click="cancel">取消</el-button>
                 <el-button size="mini" type="primary" @click="submitForm">保存</el-button>
-                {{params}}
             </div>
         </header>
         <section>
@@ -17,6 +16,7 @@
             </aside>
             <main>
                 <MForm
+                    class="my-form"
                     ref="form"
                     v-show="currentNav.key === 'baseInfo'"
                     v-model="params"
@@ -24,11 +24,10 @@
                     :rules="rules"
                     :submit="submit"
                     disResetBtn
+                    disSubmitBtn
                 />
                 <div v-show="currentNav.key !== 'baseInfo'" class="code-box">
-                    {{currentNav}}
                     <aceCode :options="aceOptions" v-model="codeInner"/>
-                    <codeMirror ref="code" v-model="codeInner" :option="codeOption"/>
                     <footer v-if="this.currentNav.key === 'response'">
                         <ul>
                             <li 
@@ -109,12 +108,6 @@ export default {
                 ]
             },
 
-            // 代码显示配置
-			codeOption: {
-				lineNumbers: true,
-				readOnly: false,
-				mode: 'javascript'
-            },
             // 代码格式
             codeType: [
                 {
@@ -184,13 +177,20 @@ export default {
         }
     },
     mounted () {
+        // 接收保存结果
         ipcRenderer.on('SAVE_API_RESULT', (evt, res) => {
-            if (res.success) this.$message.success('保存成功')
+            if (res.success) {
+                this.$router.go(-1)
+                this.$message.success('保存成功')
+            }
             else this.$message.error(res)
         })
-
+        // 接收更新服务器结果
         ipcRenderer.on('UPDATE_API_RESULT', (evt, res) => {
-            if (res.success) this.$message.success('更新成功')
+            if (res.success) {
+                this.$router.go(-1)
+                this.$message.success('更新成功')
+            }
             else this.$message.error('更新失败')
         })
 
@@ -199,9 +199,6 @@ export default {
             this.type = 'edit'
 
             Object.assign(this.params, this.$route.params)
-
-            // 设置代码回显
-            // this.$refs.code.setValue(this.params.mock)
         }
 
         // 
@@ -254,6 +251,12 @@ export default {
         cancel () {
             this.$router.go(-1)
         }
+    },
+    beforeRouteLeave (to, from , next) {
+        ipcRenderer.removeAllListeners('SAVE_API_RESULT')
+        ipcRenderer.removeAllListeners('UPDATE_API_RESULT')
+
+        next()
     }
 }
 </script>
@@ -350,6 +353,11 @@ export default {
             }
         }
     }
+}
+
+.my-form {
+    max-width: 500px;
+    margin: 20px auto;
 }
 </style>
 

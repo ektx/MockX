@@ -83,11 +83,16 @@ export default {
         },
 
         goAPIS (item) {
-            this.$router.push({
-                name: 'projectApis', 
-                params: {...item}
-            })
+            this.$router.push({name: 'projectApis'})
+
+            // 保存当前项目
+            localStorage.project = JSON.stringify(item)
         }
+    },
+    beforeRouteLeave (to, from , next) {
+        ipcRenderer.removeAllListeners('GET_PROJECTS_RESULT')
+
+        next()
     }
 }
 </script>

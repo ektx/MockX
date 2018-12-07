@@ -47,8 +47,10 @@ export default {
         },
         value: {
             handler (val) {
+                console.log(val, this.myStatus, 'ace')
                 // 如果不是编辑状态，可以设置内容
                 if (this.myStatus !== 'edit') {
+                    console.log(111, val)
                     this.$nextTick(() => {
                         this.editor.session.setValue(val)
                     })
@@ -82,6 +84,8 @@ export default {
             // 设置状态为空
             this.myStatus = 'edit'
         })
+
+        this.editor.setShowPrintMargin(false)
     },
     methods: {
 
@@ -89,3 +93,8 @@ export default {
 }
 </script>
 
+<style lang="scss">
+.ace-code-mod {
+    height: 100%;
+}
+</style>
