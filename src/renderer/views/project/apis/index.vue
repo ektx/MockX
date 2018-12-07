@@ -117,9 +117,9 @@ export default {
     },
     watch: {
         current (val, old) {
-            if (old.hasOwnProperty('classes')) old.classes = ''
+            if (Reflect.has(old,'classes')) old.classes = ''
 
-            if (val.hasOwnProperty('classes')) {
+            if (Reflect.has(val,'classes')) {
                 val.classes = 'hold'
             } else {
                 this.$set(val, 'classes', 'hold')

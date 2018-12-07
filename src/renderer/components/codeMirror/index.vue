@@ -32,8 +32,9 @@ export default {
     },
     data () {
         return {
-            codeBox: '',
+            codeBox: null,
             myOption: {
+                myStatus: null,
                 // 主题效果 https://codemirror.net/demo/theme.html#dracula
                 theme: 'dracula',
                 // 显示行数
@@ -54,10 +55,14 @@ export default {
         }
     },
     watch: {
-        value (val) {
-            if (this.myOption.readOnly) {
-                this.codeBox.setValue(val)
-            }
+        value: {
+            handler (val) {
+                // 如果不是编辑状态，可以设置内容
+                if (!this.myStatus) {
+                    this.setValue(val)
+                }
+            },
+            immediate: true
         },
         option: {
             handler (val, old) {
@@ -72,6 +77,8 @@ export default {
 
         // 响应值
         this.codeBox.on('keyup', (instance, event)=> {
+            // 设置为编辑状态
+            this.myStatus = 'edit'
             this.$emit('input', instance.doc.getValue())
         })
 

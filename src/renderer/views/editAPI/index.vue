@@ -6,6 +6,7 @@
             <div class="set-box">
                 <el-button size="mini" @click="cancel">取消</el-button>
                 <el-button size="mini" type="primary" @click="submitForm">保存</el-button>
+                {{params}}
             </div>
         </header>
         <section>
@@ -25,6 +26,8 @@
                     disResetBtn
                 />
                 <div v-show="currentNav.key !== 'baseInfo'" class="code-box">
+                    {{currentNav}}
+                    <aceCode :options="aceOptions" v-model="codeInner"/>
                     <codeMirror ref="code" v-model="codeInner" :option="codeOption"/>
                     <footer v-if="this.currentNav.key === 'response'">
                         <ul>
@@ -127,6 +130,10 @@ export default {
                     value: 'txt'
                 }
             ],
+            aceOptions: {
+                mode: 'javascript',
+                theme: 'chrome'
+            },
             // 代码内容
             codeInner: '',
             // 侧边信息
@@ -158,13 +165,13 @@ export default {
             }
 
             // 回显 code
-            if (this.$refs.code) {
+            // if (this.$refs.code) {
                 if (val.key === 'headers') {
-                    this.$refs.code.setValue(this.params.headers)
+                    this.codeInner = this.params.headers
                 } else if (val.key === 'response') {
-                    this.$refs.code.setValue(this.params.mock)
+                    this.codeInner = this.params.mock
                 }
-            }
+            // }
         },
 
         // 监听代码变化 
@@ -194,7 +201,7 @@ export default {
             Object.assign(this.params, this.$route.params)
 
             // 设置代码回显
-            this.$refs.code.setValue(this.params.mock)
+            // this.$refs.code.setValue(this.params.mock)
         }
 
         // 
@@ -325,7 +332,7 @@ export default {
         height: 24px;
         padding: 0 5px;
         line-height: 24px;
-        background-color: #3d3f48 !important;
+        background-color: #F5f5f5 !important;
 
         li {
             display: inline-block;
@@ -335,7 +342,7 @@ export default {
 
             &:hover,
             &.current {
-                color: rgb(190, 190, 190);
+                color: #09f;
             }
 
             &[disabled] {
