@@ -125,7 +125,8 @@ export default {
             ],
             aceOptions: {
                 mode: 'javascript',
-                theme: 'chrome'
+                theme: 'chrome',
+                useWorker: false
             },
             // 代码内容
             codeInner: '',
@@ -160,6 +161,7 @@ export default {
             // 回显 code
             // if (this.$refs.code) {
                 if (val.key === 'headers') {
+                    console.log(this.params.headers, 333)
                     this.codeInner = this.params.headers
                 } else if (val.key === 'response') {
                     this.codeInner = this.params.mock
@@ -195,7 +197,7 @@ export default {
         })
 
         // 处理是否是编辑状态
-        if (this.$route.params.json) {
+        if (this.$route.params.api === 'edit') {
             this.type = 'edit'
 
             Object.assign(this.params, this.$route.params)
@@ -205,21 +207,30 @@ export default {
         this.currentNav = this.asideList[0]
     },
     methods: {
-        submit () {
-            switch (this.params.mockType) {
-                case 'js':
-                    option = eval(this.params.mock);
-                    break;
-                case 'json':
-                    option = eval(`(${this.params.mock})`);
-                    break;
-                default:
-                    option = this.params.mock
+        submit (status) {
+            // 表单错误提醒
+            if (!status) return this.$message.error('表单出现错误')
+
+            // 处理mock内容
+            try {
+                switch (this.params.mockType) {
+                    case 'js':
+                        option = eval(this.params.mock);
+                        break;
+                    case 'json':
+
+                        option = eval(`(${this.params.mock})`)
+                        break;
+                    default:
+                        option = this.params.mock
+                }
+            } catch (err) {
+                this.$message.error('模拟数据格式不正确')
+                return
             }
-            
+
             // 设置 mock json
             this.params.json = option
-            console.log(option, 555)
             this.type === 'add' ? this.save() : this.update()
         },
 

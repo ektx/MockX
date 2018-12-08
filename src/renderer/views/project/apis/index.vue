@@ -163,14 +163,19 @@ export default {
         addApi () {
             this.$router.push({
                 name: 'editAPI',
-                params: this.project
+                params: Object.assign(this.project, {
+                    api: 'add'
+                })
             })
         },
 
         editApi () {
+            console.log(this.current, 222)
             this.$router.push({
                 name: 'editAPI',
-                params: this.current
+                params: Object.assign(this.current, {
+                    api: 'edit'
+                })
             })
         },
 

@@ -23,10 +23,13 @@ export default {
             editor: null,
             // 编辑状态
             myStatus: null,
+            // https://github.com/ajaxorg/ace/wiki/Configuring-Ace#editor-options
             myOptions: {
                 mode: 'ace/mode/text',
                 theme: 'ace/theme/dracula',
-                fontSize: 13
+                fontSize: 13,
+                printMargin: false,
+                useWorker: true
             }
         }
     },
@@ -50,7 +53,6 @@ export default {
                 console.log(val, this.myStatus, 'ace')
                 // 如果不是编辑状态，可以设置内容
                 if (this.myStatus !== 'edit') {
-                    console.log(111, val)
                     this.$nextTick(() => {
                         this.editor.session.setValue(val)
                     })
@@ -74,7 +76,7 @@ export default {
         })
 
         // 编辑器失去焦点时
-        this.editor.session.on('blur', () => {
+        this.editor.on('blur', () => {
             console.warn('Blur Ace')
             // 设置状态为空
             this.myStatus = null
@@ -85,7 +87,6 @@ export default {
             this.myStatus = 'edit'
         })
 
-        this.editor.setShowPrintMargin(false)
     },
     methods: {
 
