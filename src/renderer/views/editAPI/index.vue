@@ -5,6 +5,7 @@
 
             <div class="set-box">
                 <el-button size="mini" @click="cancel">取消</el-button>
+                <el-button size="mini" type="primary" @click="previewEvt">预览</el-button>
                 <el-button size="mini" type="primary" @click="submitForm">保存</el-button>
             </div>
         </header>
@@ -261,6 +262,10 @@ export default {
 
         cancel () {
             this.$router.go(-1)
+        },
+
+        previewEvt () {
+            alert('预览')
         }
     },
     beforeRouteLeave (to, from , next) {

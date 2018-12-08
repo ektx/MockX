@@ -62,22 +62,14 @@
             </ul>
         </main>
 
-        <el-dialog
-            title="预览"
-            :visible.sync="preview"
-            width="90%"
-            height="80%"
-        >   
-            <aceCode v-model="code" :options="aceOptions"/>
-        </el-dialog>
+        <!-- 预览 mock 内容 -->
+        <previewMock v-model="code" :show.sync="preview"/>
     </section>
 </template>
 
 <script>
 import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
-import mock from '../../../../common/mocks/index.js'
-import date from '../../../../common/mocks/core/dateTime.js';
 
 export default {
     name: 'apis-view',
@@ -104,16 +96,6 @@ export default {
                     key: 'description'
                 }
             ],
-            // 代码显示配置
-			codeOption: {
-				lineNumbers: false,
-				readOnly: true,
-				mode: 'javascript'
-            },
-            aceOptions: {
-                mode: 'javascript',
-                readOnly: true
-            },
             preview: false,
             code: ''
         }
@@ -136,12 +118,9 @@ export default {
 
         preview (val) {
             if (val) {
-                this.$nextTick(() => {
-                    if (this.current.mockType !== 'txt')
-                        this.code = JSON.stringify(mock(this.current.json), '', '\t')
-                    else 
-                        this.code = this.current.mock
-                })
+                this.code = this.current.mockType === 'txt' 
+                    ? this.current.mock 
+                    : this.current.json
             }
         }
     },
