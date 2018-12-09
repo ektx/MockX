@@ -42,6 +42,9 @@
                 </div>
             </main>
         </section>
+
+        <!-- 预览功能 -->
+        <previewMock :show.sync="preview" v-model="params.json"/>
     </section>
 </template>
 
@@ -147,7 +150,9 @@ export default {
                 }
             ],
             // 当前菜单
-            currentNav: {}
+            currentNav: {},
+            // 预览
+            preview: false
         }
     },
     watch: {
@@ -160,14 +165,11 @@ export default {
             }
 
             // 回显 code
-            // if (this.$refs.code) {
-                if (val.key === 'headers') {
-                    console.log(this.params.headers, 333)
-                    this.codeInner = this.params.headers
-                } else if (val.key === 'response') {
-                    this.codeInner = this.params.mock
-                }
-            // }
+            if (val.key === 'headers') {
+                this.codeInner = this.params.headers
+            } else if (val.key === 'response') {
+                this.codeInner = this.params.mock
+            }
         },
 
         // 监听代码变化 
@@ -208,10 +210,7 @@ export default {
         this.currentNav = this.asideList[0]
     },
     methods: {
-        submit (status) {
-            // 表单错误提醒
-            if (!status) return this.$message.error('表单出现错误')
-
+        getMockJSON () {
             // 处理mock内容
             try {
                 switch (this.params.mockType) {
@@ -232,6 +231,14 @@ export default {
 
             // 设置 mock json
             this.params.json = option
+        },
+
+        submit (status) {
+            // 表单错误提醒
+            if (!status) return this.$message.error('表单出现错误')
+
+            this.getMockJSON()
+
             this.type === 'add' ? this.save() : this.update()
         },
 
@@ -265,7 +272,8 @@ export default {
         },
 
         previewEvt () {
-            alert('预览')
+            this.getMockJSON()
+            this.preview = true
         }
     },
     beforeRouteLeave (to, from , next) {
