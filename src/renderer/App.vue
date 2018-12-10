@@ -2,7 +2,7 @@
     <div class="mock-app">
         <aside class="mock-aside-mod">
             <nav class="navs-list">
-                <a v-for="nav in navs" :key="nav.icon" :class="nav.classes" @click="current = nav">
+                <a v-for="nav in navs" :key="nav.icon" :class="nav.classes" @click="setCurrent(nav)">
                     <icon :class="nav.icon"/>
                     <p>{{nav.label}}</p>
                 </a>
@@ -56,7 +56,14 @@ export default {
         this.current = this.navs[0]
     },
     methods: {
-        
+        setCurrent (nav) {
+            // 让主菜单可以点击时跳转到
+            if (this.current.label === nav.label) {
+                this.$router.push(nav.to)
+            } else {
+                this.current = nav
+            }
+        }
     }
 }
 </script>

@@ -14,10 +14,10 @@
             </header>
             <ul class="apis-list">
                 <li 
-                    v-for="api in list" 
+                    v-for="(api,index) in list" 
                     :key="api._id" 
                     :class="api.classes"
-                    @click="current = api"
+                    @click="current = api,editIndex = index"
                 >
                     <div class="url">{{api.url}}</div>
                     <div>
@@ -62,21 +62,14 @@
             </ul>
         </main>
 
-        <el-dialog
-            title="预览"
-            :visible.sync="preview"
-            width="90%"
-            height="80%"
-        >
-            <codeMirror v-model="code" :option="codeOption"/>
-        </el-dialog>
+        <!-- 预览 mock 内容 -->
+        <previewMock v-model="code" :show.sync="preview"/>
     </section>
 </template>
 
 <script>
 import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
-import mock from '../../../../common/mocks/index.js'
 
 export default {
     name: 'apis-view',
@@ -84,6 +77,8 @@ export default {
     },
     data () {
         return {
+            // 当前项目
+            project: JSON.parse(localStorage.project),
             search: '',
             list: [],
             current: {},
@@ -101,12 +96,6 @@ export default {
                     key: 'description'
                 }
             ],
-            // 代码显示配置
-			codeOption: {
-				lineNumbers: false,
-				readOnly: true,
-				mode: 'javascript'
-            },
             preview: false,
             code: ''
         }
@@ -116,10 +105,9 @@ export default {
     },
     watch: {
         current (val, old) {
-            if(!val) return 
-            if ('classes' in old) old.classes = ''
+            if (Reflect.has(old,'classes')) old.classes = ''
 
-            if ('classes' in val) {
+            if (Reflect.has(val,'classes')) {
                 val.classes = 'hold'
             } else {
                 this.$set(val, 'classes', 'hold')
@@ -130,12 +118,9 @@ export default {
 
         preview (val) {
             if (val) {
-                this.$nextTick(() => {
-                    if (this.current.mockType !== 'txt')
-                        this.code = JSON.stringify(mock(this.current.json), '', '\t')
-                    else 
-                        this.code = this.current.mock
-                })
+                this.code = this.current.mockType === 'txt' 
+                    ? this.current.mock 
+                    : this.current.json
             }
         }
     },
@@ -144,8 +129,10 @@ export default {
 
         ipcRenderer.on('GET_ALL_APIS_RESULT', (evt, res) => {
             if (res.success) {
-                this.list = res.data
-                this.current = this.list[0]
+                if (res.data.length) {
+                    this.list = res.data
+                    this.current = this.list[0]
+                }
             } else {
                 this.$message.error(res.message)
             }
@@ -153,6 +140,7 @@ export default {
 
         ipcRenderer.on('REMOVE_API_RESULT', (evt, res) => {
             if (res.success) {
+                this.list.splice(this.editIndex,1)
                 this.$message.success('删除成功！')
             } 
         })
@@ -161,20 +149,25 @@ export default {
         addApi () {
             this.$router.push({
                 name: 'editAPI',
-                params: this.$route.params
+                params: Object.assign(this.project, {
+                    api: 'add'
+                })
             })
         },
 
         editApi () {
+            console.log(this.current, 222)
             this.$router.push({
                 name: 'editAPI',
-                params: this.current
+                params: Object.assign(this.current, {
+                    api: 'edit'
+                })
             })
         },
 
         getAPIs () {
             ipcRenderer.send('GET_ALL_APIS', {
-                id: this.$route.params._id
+                id: this.project._id
             })
         },
 
@@ -231,6 +224,11 @@ export default {
 
             })
         }
+    },
+    beforeRouteLeave (to, from , next) {
+        ipcRenderer.removeAllListeners('GET_ALL_APIS_RESULT')
+
+        next()
     }
 }
 </script>
@@ -345,4 +343,13 @@ export default {
         margin-right: 3px;
     }
 }
+
 </style>
+
+<style lang="scss">
+.el-dialog__body {
+    height: 50vh;
+}
+
+</style>
+

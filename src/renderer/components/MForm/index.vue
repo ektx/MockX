@@ -105,12 +105,8 @@ export default {
     },
     methods: {
          submitEvt () {
-            this.$refs.form.validate((valid) => {
-                if (valid) {
-                    if (this.submit && typeof this.submit === 'function') this.submit(this.value)
-                } else {
-                    return false;
-                }
+            this.$refs.form.validate(valid => {
+                this.submit(valid)
             })
         },
 

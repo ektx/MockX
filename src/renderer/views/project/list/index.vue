@@ -7,7 +7,7 @@
 
         <main>
             <ul class="project-list">
-                <li v-for="(item) in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item)">
+                <li v-for="(item,index) in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item,index)">
                     <div class="title">{{item.name}}</div>
                     <div class="subtitle">{{item.baseUrl}} <span>{{item.ctime}}</span></div>
                     <p>{{item.description}}</p>
@@ -62,7 +62,8 @@ export default {
                     }
                 ]
             },
-            menu: new Menu()
+            menu: new Menu(),
+            editIndex: null
         }
     },
     watch: {
@@ -92,26 +93,28 @@ export default {
 
         ipcRenderer.on('REMOVE_PROJECT_RESULT', (evt, res) => {
             if (res.success) {
+                this.data.splice(this.editIndex,1)
                this.$message.success('删除成功！')
             }
         })
     },
     methods: {
-        submit () {
+        submit (valid) {
             this.showDialog = false
             ipcRenderer.send('SAVE_PROJECT', this.params)
             Object.assign(this.params, {name:'', description: ''})
         },
 
         goAPIS (item) {
-            this.$router.push({
-                name: 'projectApis', 
-                params: {...item}
-            })
+            this.$router.push({name: 'projectApis'})
+
+            // 保存当前项目
+            localStorage.project = JSON.stringify(item)
         },
 
-        setMenu (item) {
+        setMenu (item,index) {
             const _this = this;
+            this.editIndex = index;
             this.menu.clear()
             this.menu.append(new MenuItem({label: '编辑', click() { console.log('item 1 clicked') }}))
             this.menu.append(new MenuItem({label: '删除', click() {
@@ -129,7 +132,13 @@ export default {
             }}))
 
            this.menu.popup({window: remote.getCurrentWindow()})
+           
         }
+    },
+    beforeRouteLeave (to, from , next) {
+        ipcRenderer.removeAllListeners('GET_PROJECTS_RESULT')
+
+        next()
     }
 }
 </script>

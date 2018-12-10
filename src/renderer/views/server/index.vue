@@ -59,6 +59,9 @@ export default {
             }
         }
     },
+    computed: {
+        ...mapState('server', ['status'])
+    },
     watch: {
         params: {
             handler (val) {
@@ -68,8 +71,15 @@ export default {
         } 
     },
     mounted () {
-        this.params.host = os.networkInterfaces().en0[1].address
-
+        // 如果已经有状态，且是开启时
+        if (this.status) {
+            // 更新状态
+            this.params.status = this.status
+        } else {
+            // 设置IP
+            this.params.host = os.networkInterfaces().en0[1].address
+        }
+    
         // 响应启动服务器结果
         ipcRenderer.on('START_SERVE_RESULT', (evt, arg) => {
             this.loaded = !arg
@@ -102,6 +112,12 @@ export default {
             this.loaded = true
             ipcRenderer.send('STOP_SERVE', true)
         }
+    },
+    beforeRouteLeave (to, from , next) {
+        ipcRenderer.removeAllListeners('START_SERVE_RESULT')
+        ipcRenderer.removeAllListeners('STOP_SERVE_RESULT')
+
+        next()
     }
 }
 </script>
