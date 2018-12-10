@@ -7,7 +7,7 @@
 
         <main>
             <ul class="project-list">
-                <li v-for="(item,index) in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item,index)">
+                <li v-for="item in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item)">
                     <div class="title">{{item.name}}</div>
                     <div class="subtitle">{{item.baseUrl}} <span>{{item.ctime}}</span></div>
                     <p>{{item.description}}</p>
@@ -15,7 +15,7 @@
             </ul>
         </main>
 
-        <el-dialog title="添加项目" :visible.sync="showDialog">
+        <el-dialog :title="dialogTitle" :visible.sync="showDialog">
             <MForm
                 v-model="params"
                 :rules="rules"
@@ -63,7 +63,7 @@ export default {
                 ]
             },
             menu: new Menu(),
-            editIndex: null
+            dialogTitle: '添加项目'
         }
     },
     watch: {
@@ -93,16 +93,32 @@ export default {
 
         ipcRenderer.on('REMOVE_PROJECT_RESULT', (evt, res) => {
             if (res.success) {
-                this.data.splice(this.editIndex,1)
+               ipcRenderer.send('GET_PROJECTS')
                this.$message.success('删除成功！')
             }
         })
+
+        ipcRenderer.on('UPDATE_PROJECT_RESULT', (evt, res) => {
+            if (res.success) {
+                ipcRenderer.send('GET_PROJECTS')
+                this.$message.success('修改成功！')
+            }
+        })
+
     },
     methods: {
         submit (valid) {
-            this.showDialog = false
-            ipcRenderer.send('SAVE_PROJECT', this.params)
-            Object.assign(this.params, {name:'', description: ''})
+            if (valid) {
+                this.showDialog = false
+                if (this.params._id) {
+                    ipcRenderer.send('UPDATE_PROJECT', this.params)
+                } else {
+                    ipcRenderer.send('SAVE_PROJECT', this.params)
+                }
+                
+                Object.assign(this.params, {name:'', description: ''})
+                this.dialogTitle = '添加项目'
+            }
         },
 
         goAPIS (item) {
@@ -112,11 +128,15 @@ export default {
             localStorage.project = JSON.stringify(item)
         },
 
-        setMenu (item,index) {
+        setMenu (item) {
             const _this = this;
-            this.editIndex = index;
             this.menu.clear()
-            this.menu.append(new MenuItem({label: '编辑', click() { console.log('item 1 clicked') }}))
+            this.menu.append(new MenuItem({label: '编辑', click() {
+                _this.showDialog = true
+                _this.dialogTitle = '编辑项目'
+                _this.params = Object.assign({},item)
+            }}))
+
             this.menu.append(new MenuItem({label: '删除', click() {
                 
                 _this.$confirm(`此操作将永久删除 ${item.name} 项目, 是否继续?`, '提示', {

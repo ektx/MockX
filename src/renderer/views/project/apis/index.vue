@@ -17,7 +17,7 @@
                     v-for="(api,index) in list" 
                     :key="api._id" 
                     :class="api.classes"
-                    @click="current = api,editIndex = index"
+                    @click="current = api"
                 >
                     <div class="url">{{api.url}}</div>
                     <div>
@@ -140,7 +140,7 @@ export default {
 
         ipcRenderer.on('REMOVE_API_RESULT', (evt, res) => {
             if (res.success) {
-                this.list.splice(this.editIndex,1)
+                this.getAPIs()
                 this.$message.success('删除成功！')
             } 
         })

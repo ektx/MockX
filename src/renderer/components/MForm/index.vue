@@ -22,7 +22,7 @@
             </el-select>
 
             <template v-else-if="item.type === 'addObject'">
-                <div 
+                <div
                     v-for="(addList, addIndex) in value[item.key]"
                     :key="addList.id" 
                     class="add-box"

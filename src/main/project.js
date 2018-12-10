@@ -83,4 +83,20 @@ ipcMain.on('REMOVE_PROJECT',(evt, arg) => {
     
 })
 
+//响应修改事件
+ipcMain.on('UPDATE_PROJECT',(evt, arg) => {
+
+    db.update({ _id: arg._id }, { $set: { name: arg.name, description: arg.description } }, {}, function (err, numReplaced) {
+        
+        if (err) return
+
+        evt.sender.send('UPDATE_PROJECT_RESULT', {
+            success: true,
+            data: numReplaced
+        })
+
+    });
+
+})
+
 
