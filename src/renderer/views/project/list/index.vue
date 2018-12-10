@@ -7,7 +7,7 @@
 
         <main>
             <ul class="project-list">
-                <li v-for="item in data" :key="item._id" @click="goAPIS(item)">
+                <li v-for="(item) in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item)">
                     <div class="title">{{item.name}}</div>
                     <div class="subtitle">{{item.baseUrl}} <span>{{item.ctime}}</span></div>
                     <p>{{item.description}}</p>
@@ -29,6 +29,8 @@
 <script>
 import { ipcRenderer } from 'electron'
 import path from 'path'
+const {remote} = require('electron')
+const {Menu, MenuItem} = remote
 
 export default {
     name: 'project-view',
@@ -59,7 +61,20 @@ export default {
                         trigger: 'blur'
                     }
                 ]
-            }
+            },
+            menu: new Menu()
+        }
+    },
+    watch: {
+        search (newVal) {
+            ipcRenderer.send('SEARCH_PROJECTS', newVal)
+            ipcRenderer.on('SEARCH_PROJECTS_RESULT', (evt, res) => {
+                if (res.success) {
+                    this.data = res.data
+                } else {
+                    this.$message.error(res.message)
+                }
+            })
         }
     },
     mounted () {
@@ -74,6 +89,12 @@ export default {
         })
 
         console.log(this.$router.options)
+
+        ipcRenderer.on('REMOVE_PROJECT_RESULT', (evt, res) => {
+            if (res.success) {
+               this.$message.success('删除成功！')
+            }
+        })
     },
     methods: {
         submit () {
@@ -87,6 +108,27 @@ export default {
                 name: 'projectApis', 
                 params: {...item}
             })
+        },
+
+        setMenu (item) {
+            const _this = this;
+            this.menu.clear()
+            this.menu.append(new MenuItem({label: '编辑', click() { console.log('item 1 clicked') }}))
+            this.menu.append(new MenuItem({label: '删除', click() {
+                
+                _this.$confirm(`此操作将永久删除 ${item.name} 项目, 是否继续?`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    ipcRenderer.send('REMOVE_PROJECT', item)
+                }).catch(() => {
+
+                })
+
+            }}))
+
+           this.menu.popup({window: remote.getCurrentWindow()})
         }
     }
 }

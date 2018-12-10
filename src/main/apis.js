@@ -89,6 +89,22 @@ ipcMain.on('UPDATE_API', (evt, arg) => {
     )
 })
 
+//响应删除api操作
+ipcMain.on('REMOVE_API', (evt,arg) => {
+
+    db.remove({_id: { $regex: new RegExp(arg._id) }}, {}, function (err, numRemoved) {
+    
+        if (err) return
+
+        evt.sender.send('REMOVE_API_RESULT', {
+            success: true,
+            data: numRemoved
+        })
+
+    });
+})
+
+
 
 function getData (req, res) {
     let query = Object.assign({}, {
