@@ -7,7 +7,7 @@
 
         <main>
             <ul class="project-list">
-                <li v-for="item in data" :key="item._id" @click="goAPIS(item)">
+                <li v-for="item in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item)">
                     <div class="title">{{item.name}}</div>
                     <div class="subtitle">{{item.baseUrl}} <span>{{item.ctime}}</span></div>
                     <p>{{item.description}}</p>
@@ -15,7 +15,7 @@
             </ul>
         </main>
 
-        <el-dialog title="添加项目" :visible.sync="showDialog">
+        <el-dialog :title="dialogTitle" :visible.sync="showDialog">
             <MForm
                 v-model="params"
                 :rules="rules"
@@ -29,6 +29,8 @@
 <script>
 import { ipcRenderer } from 'electron'
 import path from 'path'
+const {remote} = require('electron')
+const {Menu, MenuItem} = remote
 
 export default {
     name: 'project-view',
@@ -59,7 +61,21 @@ export default {
                         trigger: 'blur'
                     }
                 ]
-            }
+            },
+            menu: new Menu(),
+            dialogTitle: '添加项目'
+        }
+    },
+    watch: {
+        search (newVal) {
+            ipcRenderer.send('SEARCH_PROJECTS', newVal)
+            ipcRenderer.on('SEARCH_PROJECTS_RESULT', (evt, res) => {
+                if (res.success) {
+                    this.data = res.data
+                } else {
+                    this.$message.error(res.message)
+                }
+            })
         }
     },
     mounted () {
@@ -74,12 +90,35 @@ export default {
         })
 
         console.log(this.$router.options)
+
+        ipcRenderer.on('REMOVE_PROJECT_RESULT', (evt, res) => {
+            if (res.success) {
+               ipcRenderer.send('GET_PROJECTS')
+               this.$message.success('删除成功！')
+            }
+        })
+
+        ipcRenderer.on('UPDATE_PROJECT_RESULT', (evt, res) => {
+            if (res.success) {
+                ipcRenderer.send('GET_PROJECTS')
+                this.$message.success('修改成功！')
+            }
+        })
+
     },
     methods: {
-        submit () {
-            this.showDialog = false
-            ipcRenderer.send('SAVE_PROJECT', this.params)
-            Object.assign(this.params, {name:'', description: ''})
+        submit (valid) {
+            if (valid) {
+                this.showDialog = false
+                if (this.params._id) {
+                    ipcRenderer.send('UPDATE_PROJECT', this.params)
+                } else {
+                    ipcRenderer.send('SAVE_PROJECT', this.params)
+                }
+                
+                Object.assign(this.params, {name:'', description: ''})
+                this.dialogTitle = '添加项目'
+            }
         },
 
         goAPIS (item) {
@@ -87,6 +126,33 @@ export default {
 
             // 保存当前项目
             localStorage.project = JSON.stringify(item)
+        },
+
+        setMenu (item) {
+            const _this = this;
+            this.menu.clear()
+            this.menu.append(new MenuItem({label: '编辑', click() {
+                _this.showDialog = true
+                _this.dialogTitle = '编辑项目'
+                _this.params = Object.assign({},item)
+            }}))
+
+            this.menu.append(new MenuItem({label: '删除', click() {
+                
+                _this.$confirm(`此操作将永久删除 ${item.name} 项目, 是否继续?`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    ipcRenderer.send('REMOVE_PROJECT', item)
+                }).catch(() => {
+
+                })
+
+            }}))
+
+           this.menu.popup({window: remote.getCurrentWindow()})
+           
         }
     },
     beforeRouteLeave (to, from , next) {

@@ -53,3 +53,50 @@ ipcMain.on('SAVE_PROJECT', (evt, arg) => {
         }
     })
 })
+
+//响应搜索事件
+ipcMain.on('SEARCH_PROJECTS',(evt, arg) => {
+
+    db.find({name: { $regex: new RegExp(arg) }}).sort({ctime: -1}).exec((err, docs) => {
+        if (err) return
+
+        evt.sender.send('SEARCH_PROJECTS_RESULT', {
+            success: true,
+            data: docs
+        })
+    })
+})
+
+//响应删除事件
+ipcMain.on('REMOVE_PROJECT',(evt, arg) => {
+
+    db.remove({name: { $regex: new RegExp(arg.name) }}, {}, function (err, numRemoved) {
+    
+        if (err) return
+
+        evt.sender.send('REMOVE_PROJECT_RESULT', {
+            success: true,
+            data: numRemoved
+        })
+
+    });
+    
+})
+
+//响应修改事件
+ipcMain.on('UPDATE_PROJECT',(evt, arg) => {
+
+    db.update({ _id: arg._id }, { $set: { name: arg.name, description: arg.description } }, {}, function (err, numReplaced) {
+        
+        if (err) return
+
+        evt.sender.send('UPDATE_PROJECT_RESULT', {
+            success: true,
+            data: numReplaced
+        })
+
+    });
+
+})
+
+

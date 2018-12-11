@@ -14,7 +14,7 @@
             </header>
             <ul class="apis-list">
                 <li 
-                    v-for="api in list" 
+                    v-for="(api,index) in list" 
                     :key="api._id" 
                     :class="api.classes"
                     @click="current = api"
@@ -44,10 +44,10 @@
                             <el-dropdown-item command="local">本地路径</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
-                    <el-dropdown class="set-list" size="mini" split-button @click="editApi">
+                    <el-dropdown class="set-list" size="mini" split-button @click="editApi" @command="removeApi" >
                         编辑
                         <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item>删除</el-dropdown-item>
+                            <el-dropdown-item command='remove'>删除</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                 </div>
@@ -138,6 +138,13 @@ export default {
                 this.$message.error(res.message)
             }
         })
+
+        ipcRenderer.on('REMOVE_API_RESULT', (evt, res) => {
+            if (res.success) {
+                this.getAPIs()
+                this.$message.success('删除成功！')
+            } 
+        })
     },
     methods: {
         addApi () {
@@ -203,6 +210,20 @@ export default {
                     this.$message.error(`Could not copy text: ${err}`)
                 })
            
+        },
+
+        removeApi (type) {
+
+            type === 'remove' && 
+            this.$confirm(`此操作将永久删除, 是否继续?`, '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                ipcRenderer.send('REMOVE_API', this.current)
+            }).catch(() => {
+
+            })
         }
     },
     beforeRouteLeave (to, from , next) {
