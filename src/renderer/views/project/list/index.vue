@@ -27,10 +27,9 @@
 </template>
 
 <script>
-import { ipcRenderer, ipcMain } from 'electron'
+import { ipcRenderer, ipcMain, remote } from 'electron'
 import path from 'path'
-const {remote} = require('electron')
-const {Menu, MenuItem} = remote
+const { Menu, MenuItem } = remote
 
 export default {
     name: 'project-view',
@@ -128,17 +127,16 @@ export default {
         },
 
         setMenu (item) {
-            const _this = this;
             this.menu.clear()
-            this.menu.append(new MenuItem({label: '编辑', click() {
-                _this.showDialog = true
-                _this.dialogTitle = '编辑项目'
-                _this.params = Object.assign({},item)
+            this.menu.append(new MenuItem({label: '编辑', click: () => {
+                this.showDialog = true
+                this.dialogTitle = '编辑项目'
+                this.params = Object.assign({},item)
             }}))
 
-            this.menu.append(new MenuItem({label: '删除', click() {
+            this.menu.append(new MenuItem({label: '删除', click: () => {
                 
-                _this.$confirm(`此操作将永久删除 ${item.name} 项目, 是否继续?`, '提示', {
+                this.$confirm(`此操作将永久删除 ${item.name} 项目, 是否继续?`, '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
@@ -150,7 +148,7 @@ export default {
 
             }}))
 
-           this.menu.popup({window: remote.getCurrentWindow()})
+           this.menu.popup({})
            
         }
     },
