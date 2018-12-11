@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, ipcMain } from 'electron'
 import path from 'path'
 const {remote} = require('electron')
 const {Menu, MenuItem} = remote
@@ -69,17 +69,18 @@ export default {
     watch: {
         search (newVal) {
             ipcRenderer.send('SEARCH_PROJECTS', newVal)
-            ipcRenderer.on('SEARCH_PROJECTS_RESULT', (evt, res) => {
-                if (res.success) {
-                    this.data = res.data
-                } else {
-                    this.$message.error(res.message)
-                }
-            })
         }
     },
     mounted () {
         ipcRenderer.send('GET_PROJECTS')
+
+        ipcRenderer.on('SEARCH_PROJECTS_RESULT', (evt, res) => {
+            if (res.success) {
+                this.data = res.data
+            } else {
+                this.$message.error(res.message)
+            }
+        })
 
         ipcRenderer.on('GET_PROJECTS_RESULT', (evt, res) => {
             if (res.success) {
@@ -88,8 +89,6 @@ export default {
                 this.$message.error(res.message)
             }
         })
-
-        console.log(this.$router.options)
 
         ipcRenderer.on('REMOVE_PROJECT_RESULT', (evt, res) => {
             if (res.success) {
@@ -157,6 +156,9 @@ export default {
     },
     beforeRouteLeave (to, from , next) {
         ipcRenderer.removeAllListeners('GET_PROJECTS_RESULT')
+        ipcRenderer.removeAllListeners('REMOVE_PROJECT_RESULT')
+        ipcRenderer.removeAllListeners('UPDATE_PROJECT_RESULT')
+        ipcRenderer.removeAllListeners('SEARCH_PROJECTS_RESULT')
 
         next()
     }

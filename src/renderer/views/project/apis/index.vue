@@ -14,7 +14,7 @@
             </header>
             <ul class="apis-list">
                 <li 
-                    v-for="(api,index) in list" 
+                    v-for="api in list" 
                     :key="api._id" 
                     :class="api.classes"
                     @click="current = api"
@@ -228,6 +228,7 @@ export default {
     },
     beforeRouteLeave (to, from , next) {
         ipcRenderer.removeAllListeners('GET_ALL_APIS_RESULT')
+        ipcRenderer.removeAllListeners('REMOVE_API_RESULT')
 
         next()
     }
