@@ -57,7 +57,7 @@ ipcMain.on('SAVE_PROJECT', (evt, arg) => {
 //响应搜索事件
 ipcMain.on('SEARCH_PROJECTS',(evt, arg) => {
 
-    db.find({name: { $regex: new RegExp(arg) }}).sort({ctime: -1}).exec((err, docs) => {
+    db.find({name: { $regex: new RegExp(arg, 'i') }}).sort({ctime: -1}).exec((err, docs) => {
         if (err) return
 
         evt.sender.send('SEARCH_PROJECTS_RESULT', {
