@@ -57,6 +57,7 @@
                 <li 
                     v-for="(item, index) in apiFormat"
                     :key="index"
+                    :class="[item.key]"
                 >
                     <label>{{item.label}}: </label>
                     <span>{{item.value}}</span>
@@ -176,7 +177,6 @@ export default {
         },
 
         editApi () {
-            console.log(this.current, 222)
             this.$router.push({
                 name: 'editAPI',
                 params: Object.assign(this.current, {
@@ -249,8 +249,6 @@ export default {
 
         getMarked () {
             if (this.current.mockType !== 'txt') {
-                console.log(tomd(Object.freeze(this.current.json)
-                ))
                 this.markedInner = tomd(Object.freeze(this.current.json)
                 )
             }
@@ -286,6 +284,7 @@ export default {
 
     main {
         flex: 2.5;
+        color: #333;
         overflow: auto;
 
         header {
@@ -374,6 +373,14 @@ export default {
     margin: 10px;
     font-size: 13px;
     line-height: 24px;
+
+    li {
+        &.method {
+            span {
+                text-transform: uppercase;
+            }
+        }
+    }
 
     label {
         color: #777;

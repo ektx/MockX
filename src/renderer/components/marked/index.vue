@@ -147,6 +147,7 @@ export default {
     h1, h2, h3, h4, h5, h6 {
         margin: 0 0 1.5rem;
         color: #333;
+        font-weight: 400;
 
         &:target {
             color: #E91E63;
