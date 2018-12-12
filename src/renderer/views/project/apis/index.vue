@@ -42,6 +42,7 @@
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item command="ip">IP路径</el-dropdown-item>
                             <el-dropdown-item command="local">本地路径</el-dropdown-item>
+                            <el-dropdown-item command="project">项目形式</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                     <el-dropdown class="set-list" size="mini" split-button @click="editApi" @command="removeApi" >
@@ -61,6 +62,8 @@
                     <span>{{item.value}}</span>
                 </li>
             </ul>
+
+            <marked :value="markedInner"/>
         </main>
 
         <!-- 预览 mock 内容 -->
@@ -71,6 +74,8 @@
 <script>
 import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
+import { tomd } from '../../../../common/mocks/index.js'
+
 
 export default {
     name: 'apis-view',
@@ -98,7 +103,8 @@ export default {
                 }
             ],
             preview: false,
-            code: ''
+            code: '',
+            markedInner: ''
         }
     },
     computed: {
@@ -115,6 +121,7 @@ export default {
             }
 
             this.formatData()
+            this.getMarked()
         },
 
         preview (val) {
@@ -204,14 +211,16 @@ export default {
             let host = ''
             switch (type) {
                 case 'ip': 
-                    host = `http://${this.host}:${this.port}`; 
+                    host = `http://${this.host}:${this.port}/${this.current.baseUrl}`; 
                     break;
                 case 'local':
-                    host = `http://localhost:${this.port}`;
-                    break
+                    host = `http://localhost:${this.port}/${this.current.baseUrl}`;
+                    break;
+                case 'project':
+                    host = `${this.current.baseUrl}`
             }
 
-            let url = `${host}/${this.current.baseUrl}/${this.current.url}`
+            let url = `${host}/${this.current.url}`
 
             navigator.clipboard
                 .writeText(url)
@@ -236,6 +245,15 @@ export default {
             }).catch(() => {
 
             })
+        },
+
+        getMarked () {
+            if (this.current.mockType !== 'txt') {
+                console.log(tomd(Object.freeze(this.current.json)
+                ))
+                this.markedInner = tomd(Object.freeze(this.current.json)
+                )
+            }
         }
     },
     beforeRouteLeave (to, from , next) {
@@ -268,6 +286,7 @@ export default {
 
     main {
         flex: 2.5;
+        overflow: auto;
 
         header {
             display: flex;

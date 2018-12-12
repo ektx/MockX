@@ -46,7 +46,7 @@ function init (type, arg, parent) {
     
     switch (type) {
         case 'array': arrayFun(data, parent); break;
-        case 'object': arrayFun(data, parent); break;
+        case 'object': objectFun(data, parent); break;
         default: 
             arg.doc = [...MDheader]
             arg.doc.push(
