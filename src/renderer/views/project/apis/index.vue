@@ -29,7 +29,6 @@
         </aside>
         <main>
             <header>
-                {{project}}
                 <h1>{{current.url}}</h1>
                 <div class="set-box">
                     <el-button-group>

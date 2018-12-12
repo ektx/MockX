@@ -1,7 +1,7 @@
 const docs = {}
 const MDheader = [
     ['name', 'type', 'mark', 'defVal'],
-    [':---:', '---', '---', ':---:']
+    ['---', '---', '---', ':---:']
 ]
 
 export default function (data) {
@@ -129,7 +129,7 @@ function objectFun (arg, parent) {
 // 处理通用型数据
 function ordinaryType (arg) {
     return [
-        `${arg.name || '-'}`,
+        `**${arg.name || '-'}**`,
         `\`${arg.type}\``,
         `${arg.mark || '-'}`,
         `${arg.defVal || '-'}`
