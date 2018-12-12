@@ -308,8 +308,11 @@ export default {
 
         .url {
             font-size: 14px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
             font-weight: bold;
             color: #333;
+            overflow: hidden;
         }
 
         .method {

@@ -7,7 +7,7 @@ export {
 	tomd
 }
 
-export default function(json) {
+export default function (json) {
 	return object(json)
 }
 

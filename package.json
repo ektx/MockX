@@ -23,6 +23,7 @@
     "element-ui": "^2.4.10",
     "express": "^4.16.4",
     "highlight.js": "^9.13.1",
+    "marked": "^0.5.2",
     "nedb": "^1.8.0",
     "node-sass": "^4.10.0",
     "sass-loader": "^7.1.0",
