@@ -65,6 +65,7 @@ ipcMain.on('SEARCH_PROJECTS',(evt, arg) => {
             data: docs
         })
     })
+    
 })
 
 //响应删除事件

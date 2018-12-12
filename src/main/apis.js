@@ -105,7 +105,19 @@ ipcMain.on('REMOVE_API', (evt,arg) => {
     });
 })
 
+//响应搜索api操作
+ipcMain.on('SEARCH_APIS', (evt, arg, arg2) => {
 
+    db.find({ baseUrl: arg2, url: { $regex: new RegExp(arg) }}).sort({updatedAt: -1}).exec((err, docs) => {
+        if (err) return
+
+        evt.sender.send('SEARCH_APIS_RESULT', {
+            success: true,
+            data: docs
+        })
+    })
+
+})
 
 function getData (req, res) {
     let query = Object.assign({}, {

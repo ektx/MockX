@@ -123,7 +123,12 @@ export default {
                     ? this.current.mock 
                     : this.current.json
             }
+        },
+
+        search (val) {
+            ipcRenderer.send('SEARCH_APIS', val, this.project.baseUrl)
         }
+
     },
     mounted () {
         this.getAPIs()
@@ -145,6 +150,13 @@ export default {
                 this.$message.success('删除成功！')
             } 
         })
+
+        ipcRenderer.on('SEARCH_APIS_RESULT', (evt, res) => {
+            if (res.success) {
+                this.list = res.data
+            }
+        })
+
     },
     methods: {
         addApi () {
@@ -229,6 +241,7 @@ export default {
     beforeRouteLeave (to, from , next) {
         ipcRenderer.removeAllListeners('GET_ALL_APIS_RESULT')
         ipcRenderer.removeAllListeners('REMOVE_API_RESULT')
+        ipcRenderer.removeAllListeners('SEARCH_APIS_RESULT')
 
         next()
     }
