@@ -3,9 +3,6 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
     target: 'node',
-    externals: {
-        sqlite3: 'commonjs sqlite3'
-    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src/render/')

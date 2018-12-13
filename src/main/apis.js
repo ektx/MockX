@@ -120,6 +120,7 @@ ipcMain.on('SEARCH_APIS', (evt, arg, arg2) => {
 })
 
 function getData (req, res) {
+    console.log(req.headers, req.body)
     let query = Object.assign({}, {
         url: req.params[0],
         baseUrl: req.params.baseUrl

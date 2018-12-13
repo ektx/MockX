@@ -374,6 +374,10 @@ export default {
     line-height: 24px;
 
     li {
+        span {
+            word-break: break-all
+        }
+        
         &.method {
             span {
                 text-transform: uppercase;

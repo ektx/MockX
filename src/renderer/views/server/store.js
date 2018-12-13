@@ -8,7 +8,6 @@ export default {
     },
     mutations: {
         setHostInfo (state, data) {
-            console.log(data)
             Object.assign(state, data)
         }
     }

@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "electron-webpack dev",
-    "build": "electron-webpack && electron-builder"
+    "build": "electron-webpack && electron-builder -wm"
   },
   "author": "ektx",
   "license": "MIT",
@@ -23,11 +23,11 @@
     "element-ui": "^2.4.10",
     "express": "^4.16.4",
     "highlight.js": "^9.13.1",
+    "macaddress": "^0.2.9",
     "marked": "^0.5.2",
     "nedb": "^1.8.0",
     "node-sass": "^4.10.0",
     "sass-loader": "^7.1.0",
-    "sqlite3": "^4.0.4",
     "style-loader": "^0.23.1",
     "vue": "^2.5.17",
     "vue-loader": "^15.4.2",
@@ -38,5 +38,20 @@
   },
   "electronWebpack": {
     "title": false
+  },
+  "build": {
+    "productName": "MockX",
+    "copyright": "TQ Front End 2",
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "zip"
+      ]
+    }
   }
 }

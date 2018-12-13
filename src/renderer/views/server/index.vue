@@ -34,9 +34,9 @@
 </template>
 
 <script>
-import os from 'os'
 import { ipcRenderer } from 'electron'
 import { mapState, mapMutations } from 'vuex'
+import { getIPv4 } from '../../../common/getIP/index.js'
 
 export default {
     name: 'server-view',
@@ -70,14 +70,14 @@ export default {
             deep: true
         } 
     },
-    mounted () {
+    async mounted () {
         // 如果已经有状态，且是开启时
         if (this.status) {
             // 更新状态
             this.params.status = this.status
         } else {
             // 设置IP
-            this.params.host = os.networkInterfaces().en0[1].address
+            this.params.host = await getIPv4()
         }
     
         // 响应启动服务器结果
