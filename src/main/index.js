@@ -13,7 +13,8 @@ function createWindow() {
     win = new BrowserWindow({
         width: 800,
         minWidth: 500,
-        minHeight: 300
+        minHeight: 300,
+        titleBarStyle: 'hidden',
     })
 
     // 判断开发与生产

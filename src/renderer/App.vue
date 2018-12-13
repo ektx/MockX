@@ -85,9 +85,11 @@ body {
     overflow: hidden;
 
     aside {
+        padding: 20px 0 0;
         width: 70px;
         height: 100vh;
         background-color: #eee;
+        -webkit-app-region: drag;
     }
 
     main {
