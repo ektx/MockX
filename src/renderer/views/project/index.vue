@@ -15,3 +15,9 @@ export default {
 }
 </script>
 
+<style lang="scss" scoped>
+.project-view {
+    width: 100%;
+    overflow: hidden;
+}
+</style>

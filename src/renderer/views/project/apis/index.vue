@@ -29,7 +29,7 @@
         </aside>
         <main>
             <header>
-                <h1>{{current.url}}</h1>
+                <h1 :title="current.url">{{current.url}}</h1>
                 <div class="set-box">
                     <el-button-group>
                         <el-button size="mini" @click="goList">返回</el-button>
@@ -52,18 +52,20 @@
                     </el-dropdown>
                 </div>
             </header>
-            <ul class="api-info">
-                <li 
-                    v-for="(item, index) in apiFormat"
-                    :key="index"
-                    :class="[item.key]"
-                >
-                    <label>{{item.label}}: </label>
-                    <span>{{item.value}}</span>
-                </li>
-            </ul>
+            <div class="content-box">
+                <ul class="api-info">
+                    <li 
+                        v-for="(item, index) in apiFormat"
+                        :key="index"
+                        :class="[item.key]"
+                    >
+                        <label>{{item.label}}: </label>
+                        <span>{{item.value}}</span>
+                    </li>
+                </ul>
 
-            <marked :value="markedInner"/>
+                <marked :value="markedInner"/>
+            </div>
         </main>
 
         <!-- 预览 mock 内容 -->
@@ -287,17 +289,20 @@ export default {
         overflow: auto;
 
         header {
-            display: flex;
-            flex-direction: column;
+            width: 100%;
+            padding: 20px 10px 0;
+            box-sizing: border-box;
 
             h1 {
-                flex: 1;
-                margin: 20px 10px 0 10px;
                 font-size: 18px;
                 font-weight: 400;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                -webkit-app-region: drag;
             }
             .set-box {
-                margin: 10px;
+                margin: 10px 0;
             
                 .back-list {
                     width: 24px;
