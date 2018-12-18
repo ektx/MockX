@@ -2,6 +2,7 @@ import { app, BrowserWindow, session } from 'electron'
 import path from 'path'
 import { format as formatUrl } from 'url'
 import './serve.js'
+import './postMan.js'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 

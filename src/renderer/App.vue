@@ -37,6 +37,11 @@ export default {
                     to: '/database',
                     icon: 'icon-file'
                 },
+                {
+                    label: 'postMan',
+                    to: '/postMan',
+                    icon: 'icon-deliver'
+                },
             ],
             current: null
         }
