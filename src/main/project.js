@@ -5,7 +5,8 @@ import os from 'os'
 
 let db = new Datastore({
     filename: path.join(os.homedir(), 'mock-x/db/projects.db'),
-    autoload: true
+    autoload: true,
+    timestampData: true
 })
 
 /**
@@ -14,7 +15,7 @@ let db = new Datastore({
  * @param {arguments} arg 参数
  */
 function getProjects (evt, arg) {
-    db.find({}).sort({ctime: -1}).exec((err, docs) => {
+    db.find({}).sort({createdAt: -1}).exec((err, docs) => {
         if (err) return
 
         evt.sender.send('GET_PROJECTS_RESULT', {
@@ -30,9 +31,7 @@ export default {
 
 // 响应保存事件
 ipcMain.on('SAVE_PROJECT', (evt, arg) => {
-    let time = new Date
     db.findOne({name: arg.name}, (err, docs) => {
-        console.log(1, err, docs)
         if (err) return
 
         if (docs) {
@@ -42,8 +41,7 @@ ipcMain.on('SAVE_PROJECT', (evt, arg) => {
             })
         } else {
             db.insert(Object.assign(arg, {
-                ctime: time,
-                baseUrl: `project${+ time}`
+                baseUrl: `project${+ new Date}`
             }), (err, docs)=> {
                 if (err) return
                 

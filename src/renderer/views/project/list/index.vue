@@ -46,6 +46,10 @@ export default {
                 {
                     label: '项目描述',
                     key: 'description'
+                },
+                {
+                    label: '线上地址',
+                    key: 'online'
                 }
             ],
             params: {
