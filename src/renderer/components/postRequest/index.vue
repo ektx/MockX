@@ -13,14 +13,14 @@
         </div>
 
         <div class="add-params" v-if="addParams">
-            <table :data='urlParams' @urlParamsChange='urlParamsChange'></table>
+            <eTable :data='urlParams' @urlParamsChange='urlParamsChange'></eTable>
         </div>
 
         <div class="custom-params">
             <el-tabs v-model="customActiveName">
                 <el-tab-pane label="Headers" name="Headers">
 
-                    <table :data='customHeaders'></table>
+                    <eTable :data='customHeaders'></eTable>
 
                 </el-tab-pane>
                 <el-tab-pane label="Body" name="Body" :disabled='requestParams.type==="GET"'>
@@ -30,7 +30,7 @@
                         <el-radio label="x-www-form-urlencoded">x-www-form-urlencoded</el-radio>
                     </el-radio-group>
 
-                    <table :data='customBodys'></table>
+                    <eTable :data='customBodys'></eTable>
 
                 </el-tab-pane>
             </el-tabs>
