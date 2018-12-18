@@ -3,24 +3,19 @@
         <el-tabs v-model="editableTabsValue" type="card" editable @edit="handleTabsEdit">
             <el-tab-pane
                 :key="item.name"
-                v-for="(item, index) in editableTabs"
+                v-for="(item) in editableTabs"
                 :label="item.title"
                 :name="item.name"
             >
                 
-                <PostRequest ref="postReq"></PostRequest>
+                <postRequest ref="postReq"></postRequest>
             </el-tab-pane>
         </el-tabs>
     </div>
 </template>
 <script>
-import PostRequest from '../../components/postRequest';
-
 export default {
     name: 'post-man',
-    components: {
-        PostRequest
-    },
     data () {
         return {
             editableTabsValue: '1',

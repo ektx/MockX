@@ -11,6 +11,7 @@
         </el-table-column>
         <el-table-column
             v-for="(item,index) in columns"
+            :key="index"
             :prop='item.prop'
             :label='item.label'>
             <template slot-scope="scope">

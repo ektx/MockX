@@ -292,6 +292,7 @@ export default {
             width: 100%;
             padding: 20px 10px 0;
             box-sizing: border-box;
+            -webkit-app-region: drag;
 
             h1 {
                 font-size: 18px;
@@ -299,10 +300,10 @@ export default {
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                -webkit-app-region: drag;
             }
             .set-box {
                 margin: 10px 0;
+                -webkit-app-region: no-drag;
             
                 .back-list {
                     width: 24px;

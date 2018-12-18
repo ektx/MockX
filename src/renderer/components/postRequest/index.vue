@@ -13,14 +13,14 @@
         </div>
 
         <div class="add-params" v-if="addParams">
-            <Etable :data='urlParams' @urlParamsChange='urlParamsChange'></Etable>
+            <table :data='urlParams' @urlParamsChange='urlParamsChange'></table>
         </div>
 
         <div class="custom-params">
             <el-tabs v-model="customActiveName">
                 <el-tab-pane label="Headers" name="Headers">
 
-                    <Etable :data='customHeaders'></Etable>
+                    <table :data='customHeaders'></table>
 
                 </el-tab-pane>
                 <el-tab-pane label="Body" name="Body" :disabled='requestParams.type==="GET"'>
@@ -30,7 +30,7 @@
                         <el-radio label="x-www-form-urlencoded">x-www-form-urlencoded</el-radio>
                     </el-radio-group>
 
-                    <Etable :data='customBodys'></Etable>
+                    <table :data='customBodys'></table>
 
                 </el-tab-pane>
             </el-tabs>
@@ -72,12 +72,9 @@
 <script>
 import { ipcRenderer } from 'electron'
 import { Loading } from 'element-ui';
-import Etable from '../../components/table'
+
 export default {
     name: 'PostRequest',
-    components: {
-        Etable
-    },
     data () {
         return {
             requestParams:{
