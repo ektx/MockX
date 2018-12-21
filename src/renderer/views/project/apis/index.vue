@@ -64,6 +64,7 @@
                     </li>
                 </ul>
 
+                <marked :value="headerMarked"/>
                 <marked :value="markedInner"/>
             </div>
         </main>
@@ -106,7 +107,10 @@ export default {
             ],
             preview: false,
             code: '',
-            markedInner: ''
+            // 接口返回内容markdown文档化内容
+            markedInner: '',
+            // 请求头信息 markdown 文档化内容
+            headerMarked: ''
         }
     },
     computed: {
@@ -250,8 +254,8 @@ export default {
 
         getMarked () {
             if (this.current.mockType !== 'txt') {
-                this.markedInner = tomd(Object.freeze(this.current.json)
-                )
+                this.markedInner = tomd(Object.freeze(this.current.json), 'Body')
+                this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
             }
         }
     },
@@ -285,6 +289,8 @@ export default {
 
     main {
         flex: 2.5;
+        display: flex;
+        flex-direction: column;
         color: #333;
         overflow: auto;
 
@@ -328,6 +334,11 @@ export default {
                     vertical-align: middle;
                 }
             }
+        }
+
+        .content-box {
+            flex: 1;
+            overflow: auto;
         }
     }
 }

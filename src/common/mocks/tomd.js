@@ -4,10 +4,10 @@ const MDheader = [
     ['---', '---', '---', ':---:']
 ]
 
-export default function (data) {
+export default function (data, label = '说明') {
     docs.main = {
         level: 1,
-        label: '返回参数',
+        label,
         data: data
     }
 
