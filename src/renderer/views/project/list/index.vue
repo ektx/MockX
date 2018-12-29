@@ -1,5 +1,6 @@
 <template>
     <section class="project-view">
+        <div class="drag-bar"></div>
         <header>
             <el-input class="search-box" prefix-icon="el-icon-search" placeholder="输入项目名称" v-model="search" clearable size="mini"/>
             <el-button type="primary" plain class="add-btn" size="mini" @click="showDialog = !showDialog">添加项目</el-button>
@@ -173,9 +174,14 @@ export default {
     height: 100vh;
     flex-direction: column;
 
+    .drag-bar {
+        height: 20px;
+        -webkit-app-region: drag;
+    }
+
     header {
         display: grid;
-        margin: 20px 20px;
+        margin: 0px 20px 20px;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 
         .search-box {
