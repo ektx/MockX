@@ -1,8 +1,13 @@
 <template>
     <ul class="mockx-ul-list-mod">
-        <li v-for="item in format" :key="item.key">
+        <li 
+            v-for="(item, index) in result" 
+            :key="index" 
+            :class="item.key"
+            @click="click(item)"
+        >
             <label>{{item.label}}: </label>
-            <span>{{data[item.key]}}</span>
+            <span>{{item.value}}</span>
         </li>
     </ul>
 </template>
@@ -20,9 +25,40 @@ export default {
             default: null
         }
     },
+    watch: {
+        data: {
+            handler (val) {
+                this.formatData(val)
+            },
+            immediate: true
+        }
+    },
     data () {
         return {
+            result: null
+        }
+    },
+    methods: {
+        formatData () {
+            this.result = this.format.map(val => {
+                if (Array.isArray(val.key)) {
+                    let _v = ''
+                    val.key.forEach(k => {
+                        // 防止第一个为 /
+                        _v += (_v ? val.split : '') + this.data[k]
+                    })
+                    val.value = _v
+                } else {
+                    val.value = this.data[val.key]
+                }
 
+                return val
+            })
+        },
+
+        click (item) {
+            console.log(item)
+            if (item.evt) item.evt(item)
         }
     }
 }
@@ -33,7 +69,7 @@ export default {
     font-size: 13px;
     line-height: 1.7em;
 
-    label: {
+    label {
         color: #333;
     }
     span {

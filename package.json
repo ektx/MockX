@@ -25,6 +25,7 @@
     "highlight.js": "^9.13.1",
     "macaddress": "^0.2.9",
     "marked": "^0.5.2",
+    "moment": "^2.23.0",
     "nedb": "^1.8.0",
     "node-sass": "^4.10.0",
     "sass-loader": "^7.1.0",

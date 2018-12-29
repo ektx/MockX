@@ -10,7 +10,7 @@
             <ul class="project-list">
                 <li v-for="item in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item)">
                     <div class="title">{{item.name}}</div>
-                    <div class="subtitle">{{item.baseUrl}} <span>{{item.ctime}}</span></div>
+                    <div class="subtitle"><span>{{formatTime(item)}}</span> - {{item.baseUrl}} </div>
                     <p>{{item.description}}</p>
                 </li>
             </ul>
@@ -30,6 +30,7 @@
 <script>
 import { ipcRenderer, ipcMain, remote } from 'electron'
 import path from 'path'
+
 const { Menu, MenuItem } = remote
 
 export default {
@@ -155,6 +156,10 @@ export default {
 
            this.menu.popup({})
            
+        },
+
+        formatTime (item) {
+            return this.$moment(item.updatedAt).fromNow()
         }
     },
     beforeRouteLeave (to, from , next) {

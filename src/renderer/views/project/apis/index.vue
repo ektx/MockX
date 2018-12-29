@@ -35,14 +35,7 @@
                     
                     <template v-if="this.current">
                         <el-button size="mini" @click="preview = !preview">预览</el-button>
-                        <el-dropdown class="set-list" @click="copyUrl('min')" size="mini" split-button @command="copyUrl" >
-                            复制
-                            <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item command="ip">IP路径</el-dropdown-item>
-                                <el-dropdown-item command="local">本地路径</el-dropdown-item>
-                                <el-dropdown-item command="project">项目形式</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </el-dropdown>
+                        
                         <el-dropdown class="set-list" size="mini" split-button @click="editApi" @command="removeApi" >
                             编辑
                             <el-dropdown-menu slot="dropdown">
@@ -54,18 +47,8 @@
             </header>
             <div class="content-box">
                 <APIProjectInfo v-if="!current" :data="project"/>
-                <div v-else class="api-info-box">
-                    <ul class="api-info">
-                        <li 
-                            v-for="(item, index) in apiFormat"
-                            :key="index"
-                            :class="[item.key]"
-                        >
-                            <label>{{item.label}}: </label>
-                            <span>{{item.value}}</span>
-                        </li>
-                    </ul>
-
+                <APIInfo v-else :data="current"/>
+                <div class="api-info-box">
                     <marked :value="headerMarked"/>
                     <marked :value="markedInner"/>
                 </div>
@@ -82,11 +65,13 @@ import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
 import { tomd } from '../../../../common/mocks/index.js'
 import APIProjectInfo from './project.vue'
+import APIInfo from './api.vue'
 
 export default {
     name: 'apis-view',
     components: {
-        APIProjectInfo
+        APIProjectInfo,
+        APIInfo
     },
     data () {
         return {
@@ -96,20 +81,7 @@ export default {
             search: '',
             list: [],
             current: null,
-            apiFormat: [
-                {
-                    label: 'URL',
-                    key: ['baseUrl', 'url']
-                },
-                {
-                    label: 'Method',
-                    key: 'method'
-                },
-                {
-                    label: '描述',
-                    key: 'description'
-                }
-            ],
+            
             preview: false,
             code: '',
             // 接口返回内容markdown文档化内容
@@ -138,8 +110,11 @@ export default {
                 } else {
                     this.$set(val, 'classes', 'hold')
                 }
-    
-                this.formatData()
+
+                this.markedInner = ''
+                this.headerMarked = ''
+
+                // this.formatData()
                 this.getMarked()
             }
         },
@@ -212,46 +187,8 @@ export default {
             })
         },
 
-        formatData () {
-            this.apiFormat.forEach(item => {
-                if (Array.isArray(item.key)) {
-                    item.value = item.key.reduce((a, b) => {
-                        return `${this.current[a]}/${this.current[b]}`
-                    })
-                } else {
-                    item.value = this.current[item.key]
-                }
-            })
-        },
-
         goList () {
             this.$router.push({name: 'projectList'})
-        },
-
-        copyUrl (type) {
-            let host = ''
-            switch (type) {
-                case 'ip': 
-                    host = `http://${this.host}:${this.port}/${this.current.baseUrl}`; 
-                    break;
-                case 'local':
-                    host = `http://localhost:${this.port}/${this.current.baseUrl}`;
-                    break;
-                case 'project':
-                    host = `${this.current.baseUrl}`
-            }
-
-            let url = `${host}/${this.current.url}`
-
-            navigator.clipboard
-                .writeText(url)
-                .then(() => {
-                    this.$message.success('复制成功')
-                })
-                .catch(err => {
-                    this.$message.error(`Could not copy text: ${err}`)
-                })
-           
         },
 
         removeApi (type) {
@@ -398,7 +335,7 @@ export default {
                 color: #09f;
             }
             &.get {
-                color: yellowgreen;
+                color: rgb(113, 121, 98);
             }
         }
 
