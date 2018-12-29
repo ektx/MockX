@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, session, ipcMain } from 'electron'
 import path from 'path'
 import { format as formatUrl } from 'url'
 import './serve.js'
@@ -9,28 +9,31 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 // 创建一个全局的窗口对象，方便我们对它进行管理
 let win
 
-function createWindow() {
-    // 创建窗口
-    win = new BrowserWindow({
+function createWindow(opt) {
+    let options = Object.assign({}, {
         width: 800,
         minWidth: 500,
         minHeight: 300,
         titleBarStyle: 'hidden',
-    })
+        url: ''
+    }, opt)
+
+    // 创建窗口
+    win = new BrowserWindow(options)
 
     // 判断开发与生产
     if (isDevelopment) {
-        win.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
+        win.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT+ options.url}`)
     } else {
         win.loadURL(formatUrl({
-            pathname: path.join(__dirname, 'index.html'),
+            pathname: path.join(__dirname, 'index.html', options.url),
             protocol: 'file',
             slashes: true
         }))
     }
 
     // 打开开发者工具
-    // win.webContents.openDevTools()
+    win.webContents.openDevTools()
 
     // 监听窗口关闭
     win.on('closed', () => {
@@ -55,10 +58,19 @@ function createWindow() {
 }
 
 // 当应用准备好后，我们开始调用窗口事件
-app.on('ready', createWindow)
+app.on('ready', () => {
+    createWindow({
+        url: '#/login',
+        // minimizable: false,
+        // maximizable: false,
+        width: 300,
+        height: 350,
+        titleBarStyle: 'customButtonsOnHover'
+    })
+})
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
+    if (process.platform !== 'drawin') {
         app.quit()
     }
 })
@@ -69,4 +81,10 @@ app.on('activate', () => {
     if (win === null) {
         createWindow()
     }
+})
+
+ipcMain.on('OPEN_MAIN_WINDOW', (evt, arg) => {
+    createWindow({
+        url: '#/'
+    })
 })

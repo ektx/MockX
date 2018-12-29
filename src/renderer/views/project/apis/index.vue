@@ -255,7 +255,9 @@ export default {
         getMarked () {
             if (this.current.mockType !== 'txt') {
                 this.markedInner = tomd(Object.freeze(this.current.json), 'Body')
-                this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
+
+                if (this.current.headers)
+                    this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
             }
         }
     },

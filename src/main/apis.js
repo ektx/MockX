@@ -2,12 +2,18 @@ import { ipcMain } from 'electron'
 import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
+import notifier from 'node-notifier'
 import mock from '../common/mocks/index.js'
 
 let db = new Datastore({
     filename: path.join(os.homedir(), 'mock-x/db/apis.db'),
     autoload: true,
     timestampData: true
+})
+
+notifier.notify(path.join(os.homedir(), 'mock-x/db/apis.db'))
+db.loadDatabase(err => {
+    notifier.notify('Message', err)
 })
 
 ipcMain.on('SAVE_API', (evt, arg) => {
