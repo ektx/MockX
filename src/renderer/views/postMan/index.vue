@@ -3,17 +3,24 @@
         <el-tabs v-model="editableTabsValue" type="card" editable @edit="handleTabsEdit">
             <el-tab-pane
                 :key="item.name"
-                v-for="(item) in editableTabs"
+                v-for="(item,index) in editableTabs"
                 :label="item.title"
                 :name="item.name"
             >
-                
-                <postRequest ref="postReq"></postRequest>
+                <keep-alive>
+                    <postRequest
+                        ref="postReq"
+                        @urlChange='(url) => item.title = url'
+                        :name='item.name'
+                        :chooseName='editableTabsValue'>
+                    </postRequest>
+                </keep-alive>
             </el-tab-pane>
         </el-tabs>
     </div>
 </template>
 <script>
+import { ipcRenderer } from 'electron'
 export default {
     name: 'post-man',
     data () {
@@ -22,7 +29,6 @@ export default {
             editableTabs: [{
             title: 'New Tab',
             name: '1',
-            content: 'Tab 1 content'
             }],
             tabIndex: 1
         }
@@ -37,7 +43,6 @@ export default {
           this.editableTabs.push({
             title: 'New Tab',
             name: newTabName,
-            content: 'New Tab content'
           });
           this.editableTabsValue = newTabName;
         }
@@ -57,7 +62,18 @@ export default {
           
           this.editableTabsValue = activeName;
           this.editableTabs = tabs.filter(tab => tab.name !== targetName);
+
+
+          if (this.editableTabs.length===0){
+            let newTabName = ++this.tabIndex + '';  
+            this.editableTabs.push({
+                title: 'New Tab',                                    
+                name: newTabName,
+            });
+            this.editableTabsValue = newTabName;
+          }
         }
+
       }
     }
 }

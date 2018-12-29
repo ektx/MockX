@@ -3,6 +3,8 @@
         :data="data"
         size='small'
         border
+        ref="multipleTable"
+        @selection-change='selectionChange'
         style="width: 100%">
         <el-table-column
             type="selection"
@@ -19,7 +21,9 @@
                     size='mini'
                     v-model="scope.row[item.prop]"
                     :placeholder="index%2===0?'New key':'Value'"
-                    @keyup.native='$emit("urlParamsChange")'></el-input>
+                    style="width:96%;"
+                    @keyup.native='change'></el-input>
+                <i class="el-icon-close" v-if="index%2===1 && data.length>1" @click='delet(scope.$index)'></i>
             </template>
         </el-table-column>
         
@@ -29,10 +33,6 @@
 export default {
     name: 'Etable',
     props: {
-        data: {
-            type: Array,
-            default: () => [{}]
-        },
         columns: {
             type: Array,
             default: () => [{
@@ -42,6 +42,46 @@ export default {
                 prop: 'value',
                 label: 'Value'
             },]
+        }
+    },
+    data () {
+        return {
+            data: [{}],
+            selections: []
+        }
+    },
+    watch: {
+        data:{
+            handler(value){
+                console.log(value)
+                value.forEach( item => {
+                    this.$refs.multipleTable.toggleRowSelection( item ,true )
+                });
+            },
+            deep: true
+        }
+    },
+    mounted() {
+        this.$refs.multipleTable.toggleRowSelection( this.data[0] ,true )
+    },
+    methods: {
+        change () {
+            this.$emit("change",this.selections);
+
+            if (this.data.length===1){
+                this.data.push({})
+            } else if (Object.keys(this.data[this.data.length-1]).length>0){
+                this.data.push({})
+            }
+            
+        },
+        delet (index) {
+            this.data.splice(index,1);
+            this.$emit("change");
+        },
+        selectionChange (selection) {
+            this.selections = selection;
+            this.$emit("change",this.selections);
         }
     }
 }
@@ -57,5 +97,12 @@ export default {
             background-color: #fff;
         }
     }
+}
+.el-icon-close{
+    display: none;
+    cursor: pointer;
+}
+.el-table__row:hover .el-icon-close{
+    display: inline-block;
 }
 </style>
