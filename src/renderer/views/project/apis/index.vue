@@ -17,7 +17,7 @@
                     v-for="api in list" 
                     :key="api._id" 
                     :class="api.classes"
-                    @click="current = api"
+                    @click="setCurrent(api)"
                 >
                     <div class="url">{{api.url}}</div>
                     <div>
@@ -29,43 +29,46 @@
         </aside>
         <main>
             <header>
-                <h1 :title="current.url">{{current.url}}</h1>
+                <h1 :title="title">{{title}}</h1>
                 <div class="set-box">
-                    <el-button-group>
-                        <el-button size="mini" @click="goList">返回</el-button>
-                        <el-button size="mini" @click="preview = !preview">预览</el-button>
-                    </el-button-group>
+                    <el-button size="mini" @click="goList">项目</el-button>
                     
-                    <el-dropdown class="set-list" @click="copyUrl('min')" size="mini" split-button @command="copyUrl" >
-                        复制
-                        <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item command="ip">IP路径</el-dropdown-item>
-                            <el-dropdown-item command="local">本地路径</el-dropdown-item>
-                            <el-dropdown-item command="project">项目形式</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </el-dropdown>
-                    <el-dropdown class="set-list" size="mini" split-button @click="editApi" @command="removeApi" >
-                        编辑
-                        <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item command='remove'>删除</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </el-dropdown>
+                    <template v-if="this.current">
+                        <el-button size="mini" @click="preview = !preview">预览</el-button>
+                        <el-dropdown class="set-list" @click="copyUrl('min')" size="mini" split-button @command="copyUrl" >
+                            复制
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item command="ip">IP路径</el-dropdown-item>
+                                <el-dropdown-item command="local">本地路径</el-dropdown-item>
+                                <el-dropdown-item command="project">项目形式</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                        <el-dropdown class="set-list" size="mini" split-button @click="editApi" @command="removeApi" >
+                            编辑
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item command='remove'>删除</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+                    </template>
                 </div>
             </header>
             <div class="content-box">
-                <ul class="api-info">
-                    <li 
-                        v-for="(item, index) in apiFormat"
-                        :key="index"
-                        :class="[item.key]"
-                    >
-                        <label>{{item.label}}: </label>
-                        <span>{{item.value}}</span>
-                    </li>
-                </ul>
+                <APIProjectInfo v-if="!current" :data="project"/>
+                <div v-else class="api-info-box">
+                    <ul class="api-info">
+                        <li 
+                            v-for="(item, index) in apiFormat"
+                            :key="index"
+                            :class="[item.key]"
+                        >
+                            <label>{{item.label}}: </label>
+                            <span>{{item.value}}</span>
+                        </li>
+                    </ul>
 
-                <marked :value="headerMarked"/>
-                <marked :value="markedInner"/>
+                    <marked :value="headerMarked"/>
+                    <marked :value="markedInner"/>
+                </div>
             </div>
         </main>
 
@@ -78,19 +81,21 @@
 import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
 import { tomd } from '../../../../common/mocks/index.js'
-
+import APIProjectInfo from './project.vue'
 
 export default {
     name: 'apis-view',
     components: {
+        APIProjectInfo
     },
     data () {
         return {
             // 当前项目
             project: JSON.parse(localStorage.project),
+            title: '',
             search: '',
             list: [],
-            current: {},
+            current: null,
             apiFormat: [
                 {
                     label: 'URL',
@@ -118,16 +123,25 @@ export default {
     },
     watch: {
         current (val, old) {
-            if (Reflect.has(old,'classes')) old.classes = ''
-
-            if (Reflect.has(val,'classes')) {
-                val.classes = 'hold'
+            // 如果 vall = null
+            if (!val) {
+                this.title = this.project.name
             } else {
-                this.$set(val, 'classes', 'hold')
+                this.title = val.description || val.url
             }
 
-            this.formatData()
-            this.getMarked()
+            if (old && Reflect.has(old,'classes')) old.classes = ''
+
+            if (val) {
+                if (Reflect.has(val,'classes')) {
+                    val.classes = 'hold'
+                } else {
+                    this.$set(val, 'classes', 'hold')
+                }
+    
+                this.formatData()
+                this.getMarked()
+            }
         },
 
         preview (val) {
@@ -146,11 +160,13 @@ export default {
     mounted () {
         this.getAPIs()
 
+        this.title = this.project.name
+
         ipcRenderer.on('GET_ALL_APIS_RESULT', (evt, res) => {
             if (res.success) {
                 if (res.data.length) {
                     this.list = res.data
-                    this.current = this.list[0]
+                    // this.current = this.list[0]
                 }
             } else {
                 this.$message.error(res.message)
@@ -184,7 +200,7 @@ export default {
         editApi () {
             this.$router.push({
                 name: 'editAPI',
-                params: Object.assign(this.current, {
+                params: Object.assign({}, this.current, {
                     api: 'edit'
                 })
             })
@@ -255,7 +271,17 @@ export default {
         getMarked () {
             if (this.current.mockType !== 'txt') {
                 this.markedInner = tomd(Object.freeze(this.current.json), 'Body')
-                this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
+
+                if (this.current.headers)
+                    this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
+            }
+        },
+
+        setCurrent (api) {
+            if (this.current && this.current.url === api.url) {
+                this.current = null
+            } else {
+                this.current = api
             }
         }
     },
@@ -349,9 +375,12 @@ export default {
     border-top: 1px solid #eee;
 
     li {
+        position: relative;
         padding: 8px 5px;
         font-size: 11px;
-        border-bottom: 1px solid #eee;
+        user-select: none;
+        cursor: pointer;
+        transition: background 0s ease-in-out;
 
         .url {
             font-size: 14px;
@@ -379,8 +408,18 @@ export default {
             text-transform: uppercase;
         }
 
+        &::after {
+            position: absolute;
+            bottom: 0;
+            left: 5px;
+            right: 0;
+            content: '';
+            border-bottom: 1px solid #eee;
+        }
+
         &.hold {
             background: #f1f1f1;
+            transition: background .3s ease-in-out;
         }
     }
 }
