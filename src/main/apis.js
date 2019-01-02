@@ -10,6 +10,7 @@ let db = new Datastore({
     timestampData: true
 })
 
+// 准备废弃
 ipcMain.on('SAVE_API', (evt, arg) => {
     /*
     { 
@@ -59,8 +60,83 @@ ipcMain.on('SAVE_API', (evt, arg) => {
     )
 })
 
+/**
+ * 添加 API 时，默认只要提供
+ * @param {string} url 地址
+ * @param {string} method 方法
+ * @param {string} description 描述
+ * @param {string} baseUrl 这是自带必填内容，用于表示所属项目
+ * @returns 返回成功后_id或失败信息
+ */
+ipcMain.on('ADD_API', (evt, arg) => {
+    console.log(arg)
+    // 验证传参
+    let result = true
+    let message = []
+
+    if (!arg.baseUrl) {
+        result = false
+        message.push('没有 baseUrl')
+    }
+    if (!arg.url) {
+        result = false
+        message.push('没有 url')
+    }
+
+    if (!result) {
+        evt.sender.send('ADD_API_RESULT', {
+            success: false,
+            message
+        })
+        return
+    }
+
+    db.findOne(
+        {baseUrl: arg.baseUrl, url: arg.url},
+        (err, doc) => {
+            if (err) {
+                evt.sender.send('ADD_API_RESULT', {
+                    success: false,
+                    message: '出现未知错误',
+                    data: err
+                })
+                return
+            }
+
+            console.log(doc, arg)
+
+            if (doc) {
+                evt.sender.send('ADD_API_RESULT', {
+                    success: false,
+                    message: '此 API 地址已经存在'
+                })
+            } else {
+                db.insert(arg, (err, docs) => {
+                    if (err) {
+                        evt.sender.send('ADD_API_RESULT', {
+                            success: false,
+                            message: '出现未知错误',
+                            data: err
+                        })
+                        return
+                    }
+
+                    evt.sender.send('ADD_API_RESULT', {
+                        success: true,
+                        message: '添加成功',
+                        data: docs
+                    })
+                })
+            }
+        }
+    )
+})
+
+/**
+ * 通过 baseUrl 来查寻所有的 APIs
+ */
 ipcMain.on('GET_ALL_APIS', (evt, arg) => {
-    db.find({projectId: arg.id}).sort({updatedAt: -1}).exec((err, docs) => {
+    db.find({baseUrl: arg.baseUrl}).sort({updatedAt: -1}).exec((err, docs) => {
         if (err) return
 
         evt.sender.send('GET_ALL_APIS_RESULT', {
@@ -70,18 +146,19 @@ ipcMain.on('GET_ALL_APIS', (evt, arg) => {
     })
 })
 
+/**
+ * 更新 API 基础信息
+ */
 ipcMain.on('UPDATE_API', (evt, arg) => {
     db.update(
         {_id: arg._id},
         {$set: {
+            // 更新简介
             description: arg.description,
-            method: arg.method,
-            headers: arg.headers,
-            mockType: arg.mockType,
-            mock: arg.mock,
-            json: arg.json
+            // 更新请求方式
+            method: arg.method
         }},
-        (err, numberOfUpdated) => {
+        (err, numReplaced) => {
             let success = true
             if (err) success = false
 

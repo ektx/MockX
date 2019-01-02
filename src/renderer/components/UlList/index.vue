@@ -57,7 +57,6 @@ export default {
         },
 
         click (item) {
-            console.log(item)
             if (item.evt) item.evt(item)
         }
     }

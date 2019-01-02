@@ -49,14 +49,15 @@
                 <APIProjectInfo v-if="!current" :data="project"/>
                 <APIInfo v-else :data="current"/>
                 <div class="api-info-box">
-                    <marked :value="headerMarked"/>
-                    <marked :value="markedInner"/>
                 </div>
             </div>
         </main>
 
         <!-- 预览 mock 内容 -->
         <previewMock v-model="code" :show.sync="preview"/>
+
+        <AddNewAPI v-model="addNewAPI" :project="project" :data="apiData" @update="getAPIs"/>
+        
     </section>
 </template>
 
@@ -66,12 +67,14 @@ import { mapState } from 'vuex'
 import { tomd } from '../../../../common/mocks/index.js'
 import APIProjectInfo from './project.vue'
 import APIInfo from './api.vue'
+import AddNewAPI from './addAPI.vue'
 
 export default {
     name: 'apis-view',
     components: {
         APIProjectInfo,
-        APIInfo
+        APIInfo,
+        AddNewAPI
     },
     data () {
         return {
@@ -85,9 +88,12 @@ export default {
             preview: false,
             code: '',
             // 接口返回内容markdown文档化内容
-            markedInner: '',
+            // markedInner: '',
             // 请求头信息 markdown 文档化内容
-            headerMarked: ''
+            // headerMarked: '',
+            addNewAPI: false,
+            // 添加api的默认内容
+            apiData: null
         }
     },
     computed: {
@@ -111,11 +117,11 @@ export default {
                     this.$set(val, 'classes', 'hold')
                 }
 
-                this.markedInner = ''
-                this.headerMarked = ''
+                // this.markedInner = ''
+                // this.headerMarked = ''
 
                 // this.formatData()
-                this.getMarked()
+                // this.getMarked()
             }
         },
 
@@ -164,12 +170,13 @@ export default {
     },
     methods: {
         addApi () {
-            this.$router.push({
-                name: 'editAPI',
-                params: Object.assign(this.project, {
-                    api: 'add'
-                })
-            })
+            // this.$router.push({
+            //     name: 'editAPI',
+            //     params: Object.assign(this.project, {
+            //         api: 'add'
+            //     })
+            // })
+            this.addNewAPI = true
         },
 
         editApi () {
@@ -183,7 +190,7 @@ export default {
 
         getAPIs () {
             ipcRenderer.send('GET_ALL_APIS', {
-                id: this.project._id
+                baseUrl: this.project.baseUrl
             })
         },
 
@@ -205,14 +212,14 @@ export default {
             })
         },
 
-        getMarked () {
-            if (this.current.mockType !== 'txt') {
-                this.markedInner = tomd(Object.freeze(this.current.json), 'Body')
+        // getMarked () {
+        //     if (this.current.mockType !== 'txt') {
+        //         this.markedInner = tomd(Object.freeze(this.current.json), 'Body')
 
-                if (this.current.headers)
-                    this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
-            }
-        },
+        //         if (this.current.headers)
+        //             this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
+        //     }
+        // },
 
         setCurrent (api) {
             if (this.current && this.current.url === api.url) {
@@ -334,8 +341,8 @@ export default {
             &.post {
                 color: #09f;
             }
-            &.get {
-                color: rgb(113, 121, 98);
+            &.get,&.GET {
+                color: #4CAF50;
             }
         }
 
@@ -382,13 +389,6 @@ export default {
         color: #777;
         margin-right: 3px;
     }
-}
-
-</style>
-
-<style lang="scss">
-.el-dialog__body {
-    height: 50vh;
 }
 
 </style>

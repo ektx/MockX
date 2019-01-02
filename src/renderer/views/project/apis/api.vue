@@ -1,7 +1,11 @@
 <template>
     <div class="api-info-box">
-        <h3>接口基础信息</h3>
+        <h3>
+            <span>接口基础信息</span>
+            <i class="el-icon-edit" title="编辑基础信息" @click="editApi"></i>
+        </h3>
         <ul-list :data="list" :format="apiFormat"/>
+
         <h3>接口请求头信息</h3>
         <h3>接口请求参数信息</h3>
         <h3>接口请求响应信息</h3>
@@ -34,13 +38,13 @@ export default {
                     evt: this.copyUrl
                 },
                 {
-                    label: '内网 URL',
+                    label: '本地访问',
                     key: ['local', 'baseUrl', 'url'],
                     split: '/',
                     evt: this.copyUrl
                 },
                 {
-                    label: '外网 URL',
+                    label: '局域网访问',
                     key: ['host', 'baseUrl', 'url'],
                     split: '/',
                     evt: this.copyUrl
@@ -85,6 +89,12 @@ export default {
                 })
            
         },
+
+        editApi () {
+            this.$parent.addNewAPI = true
+            this.$parent.apiData = this.data
+            console.log(this.data, this.$parent.apiData)
+        }
     }
 }
 </script>
@@ -92,6 +102,26 @@ export default {
 <style lang="scss" scoped>
 .api-info-box {
     margin: 0 10px;
+    
+    h3 {
+        margin: 10px 0;
+        border-bottom: 1px solid #eee;
+
+        span {
+            font-size: 18px;
+            color: #333;
+        }
+
+        i {
+            float: right;
+            margin: 7px 5px 0;
+            cursor: pointer;
+
+            &:hover {
+                color: #09f;
+            }
+        }
+    }
 }
 .mockx-ul-list-mod {
     /deep/ li.url {
