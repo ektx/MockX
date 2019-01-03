@@ -3,6 +3,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import project from './project.js'
 import apis from './apis.js'
+import './mock.js'
 
 const app = express()
 

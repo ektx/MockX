@@ -1,19 +1,35 @@
 <template>
     <div class="api-info-box">
+        {{data}}
         <h3>
-            <span>接口基础信息</span>
+            <span>基础信息</span>
             <i class="el-icon-edit" title="编辑基础信息" @click="editApi"></i>
         </h3>
         <ul-list :data="list" :format="apiFormat"/>
 
-        <h3>接口请求头信息</h3>
-        <h3>接口请求参数信息</h3>
-        <h3>接口请求响应信息</h3>
+        <h3>
+            <span>请求头信息</span>
+        </h3>        
+        <h3>请求参数信息</h3>
+        <h3>
+            <span>响应信息</span>
+        </h3>
+        <div class="radio-list-box">
+            <ul class="mock-list-box">
+                <li v-for="item in resList" :key="item._id">{{item}}
+                    <el-checkbox :value="item.used" @change="resCurrent = item">{{item.name}}</el-checkbox>
+                </li>
+            </ul>
+            <div class="setting-box">
+                <el-button size="mini" @click="addNewMock('response')">添加</el-button>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
+import { ipcRenderer, ipcMain } from 'electron';
 
 export default {
     name: 'project-api-info',
@@ -58,7 +74,11 @@ export default {
                     key: 'description'
                 }
             ],
-            list: {}
+            list: {},
+
+            resList: {},
+            resCheckbox: null,
+            resCurrent: null
         }
     },
     computed: {
@@ -67,15 +87,53 @@ export default {
     watch: {
         data: {
             handler (val) {
+                // 切换api时，重置
+                this.resCurrent = null
+
+                // 扩展基础信息
                 this.list = Object.assign({}, val, {
                     host: 'http://'+ this.host+':'+this.port,
                     local: 'http://localhost:'+this.port
                 })
+
+                // 获取所有的 mocks
+                ipcRenderer.send('GET_API_MOCKS', {
+                    id: this.data._id
+                })
             },
             immediate: true
+        },
+
+        resCurrent (val, old) {
+            val.used = true
+
+            if (old) {
+                old.used = false
+                ipcRenderer.send('UPDATE_API_MOCK', {
+                    id: old._id,
+                    used: false
+                })
+            
+            }
+            
+            ipcRenderer.send('UPDATE_API_MOCK', {
+                id: val._id,
+                used: val.used
+            })
         }
     },
     mounted () {
+        ipcRenderer.on('GET_API_MOCKS_RESULT', (evt, res) => {
+            if (res.success) {
+                this.resList = res.data
+
+                res.data.forEach(item => {
+                    if (item.used) this.resCurrent = item
+                })
+            } else {
+                this.$message.error(res.message)
+            }
+        })
     },
     methods: {
         copyUrl ({value}) {
@@ -94,7 +152,27 @@ export default {
             this.$parent.addNewAPI = true
             this.$parent.apiData = this.data
             console.log(this.data, this.$parent.apiData)
-        }
+        },
+
+        addNewMock (type) {
+            this.$router.push({
+                name: 'editMock',
+                params: {
+                    method: type,
+                    id: this.data._id
+                }
+            })
+        },
+
+        // setResCheckBox (item) {
+        //     console.log(item)
+        //     item.used = true
+        // }
+    },
+    beforeRouteLeave (to, from, next) {
+        ipcRenderer.removeAllListeners('GET_API_MOCKS_RESULT')
+
+        next()
     }
 }
 </script>
@@ -133,5 +211,15 @@ export default {
             }
         }
     }
+}
+
+.mock-list-box {
+    li {
+        line-height: 32px;
+        border-bottom: 1px solid #eee;
+    }
+}
+.setting-box {
+    margin: 1em 0;
 }
 </style>

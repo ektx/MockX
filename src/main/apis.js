@@ -3,6 +3,7 @@ import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
 import mock from '../common/mocks/index.js'
+import { getMockJSON } from './mock.js'
 
 let db = new Datastore({
     filename: path.join(os.homedir(), 'mock-x/db/apis.db'),
@@ -103,8 +104,6 @@ ipcMain.on('ADD_API', (evt, arg) => {
                 return
             }
 
-            console.log(doc, arg)
-
             if (doc) {
                 evt.sender.send('ADD_API_RESULT', {
                     success: false,
@@ -202,8 +201,9 @@ function getData (req, res) {
         url: req.params[0],
         baseUrl: req.params.baseUrl
     })
+    console.log(query)
 
-    db.findOne(query, (err, doc) => {
+    db.findOne(query, async (err, doc) => {
         let data = `This API Not Find!`
 
         if (err) {
@@ -213,10 +213,13 @@ function getData (req, res) {
             })
             return
         }
-
+        console.log(doc, 222)
         if (doc) {
-            data = doc.mockType === 'txt' ? 
-                doc.json : mock(doc.json) 
+            data = await getMockJSON(doc._id, )
+
+            console.log(data, 1111)
+
+            data = data.type === 'txt' ? data.json : mock(data.json) 
         } 
 
         res.send(data)
