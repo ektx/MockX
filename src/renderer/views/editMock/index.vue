@@ -246,9 +246,4 @@ export default {
         }
     }
 }
-
-.api-edit-mod /deep/ .el-dialog__body {
-    height: 60vh;
-}
 </style>
-

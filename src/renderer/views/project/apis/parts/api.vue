@@ -27,7 +27,9 @@
                         </p>
                     </main>
                     <aside>
+                        <i class="el-icon-view" @click="priviewData(item)"></i>
                         <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
+                        <i class="el-icon-delete"></i>
                     </aside>
                 </li>
             </ul>
@@ -35,6 +37,9 @@
                 <el-button size="mini" @click="toEditMock('response', true, data)">添加</el-button>
             </div>
         </div>
+
+        <previewMock :show.sync="preview" height="90vh" v-model="previewData"/>
+
     </div>
 </template>
 
@@ -90,7 +95,11 @@ export default {
             resList: {},
             resCheckbox: null,
             resCurrent: null,
-            resCurrentStatus: 'auto'
+            resCurrentStatus: 'auto',
+
+            preview: false,
+            previewData: ''
+
         }
     },
     computed: {
@@ -194,10 +203,10 @@ export default {
             this.resCurrent = item
         },
 
-        // setResCheckBox (item) {
-        //     console.log(item)
-        //     item.used = true
-        // }
+        priviewData (item) {
+            this.preview = true
+            this.previewData = item.json
+        }
     },
     beforeRouteLeave (to, from, next) {
         ipcRenderer.removeAllListeners('GET_API_MOCKS_RESULT')

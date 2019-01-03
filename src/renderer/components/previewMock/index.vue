@@ -4,6 +4,7 @@
     :visible.sync="visible"
     :width="width"
     :height="height"
+    class="preview-mock-com"
 >   
     <aceCode v-model="code" :options="options"/>
 </el-dialog>   
@@ -58,6 +59,8 @@ export default {
         },
         value (val) {
             this.$nextTick(() => {
+                // 对于对象，我们使用mock来生成模拟数据
+                // 其它内容直接展示 
                 this.code = typeof val === 'object' 
                 ? JSON.stringify(mock(val), '', '\t') 
                 : val
@@ -66,3 +69,9 @@ export default {
     }
 }
 </script>
+
+<style lang="scss" scoped>
+.preview-mock-com /deep/ .el-dialog__body {
+    height: 60vh;
+}
+</style>

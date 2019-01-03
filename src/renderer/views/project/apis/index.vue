@@ -43,9 +43,9 @@
 import { ipcRenderer } from 'electron'
 import { mapState } from 'vuex'
 import { tomd } from '../../../../common/mocks/index.js'
-import APIProjectInfo from './project.vue'
-import APIInfo from './api.vue'
-import AddNewAPI from './addAPI.vue'
+import APIProjectInfo from './parts/project.vue'
+import APIInfo from './parts/api.vue'
+import AddNewAPI from './parts/addAPI.vue'
 
 export default {
     name: 'apis-view',
@@ -71,9 +71,6 @@ export default {
             // 添加api的默认内容
             apiData: null
         }
-    },
-    computed: {
-        ...mapState('server', ['host', 'port'])
     },
     watch: {
         current (val, old) {
@@ -274,7 +271,7 @@ export default {
     li {
         position: relative;
         display: flex;
-        padding: 5px 3px;
+        padding: 8px 3px;
         align-items: center;
         user-select: none;
         cursor: pointer;
