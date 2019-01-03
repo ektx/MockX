@@ -29,7 +29,7 @@
                     <aside>
                         <i class="el-icon-view" @click="priviewData(item)"></i>
                         <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
-                        <i class="el-icon-delete"></i>
+                        <i class="el-icon-delete" @click="delThisMock(item)"></i>
                     </aside>
                 </li>
             </ul>
@@ -160,6 +160,17 @@ export default {
                 this.$message.error(res.message)
             }
         })
+        
+        ipcRenderer.on('DELETE_MOCK_RESULT', (evt, res) => {
+            if (res.success) {
+                // 获取所有的 mocks
+                ipcRenderer.send('GET_API_MOCKS', {
+                    apiID: this.data._id
+                })
+            } else {
+                this.$message.error(res.message)
+            }
+        })
     },
     methods: {
         copyUrl ({value}) {
@@ -206,10 +217,28 @@ export default {
         priviewData (item) {
             this.preview = true
             this.previewData = item.json
+        },
+
+        delThisMock (item) {
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '删除',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    ipcRenderer.send('DELETE_MOCK', {
+                        _id: item._id
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                })
         }
     },
     beforeRouteLeave (to, from, next) {
         ipcRenderer.removeAllListeners('GET_API_MOCKS_RESULT')
+        ipcRenderer.removeAllListeners('DELETE_MOCK_RESULT')
 
         next()
     }

@@ -85,6 +85,23 @@ ipcMain.on('UPDATE_API_MOCK', async (evt, arg) => {
     }
 })
 
+ipcMain.on('DELETE_MOCK', async (evt, arg) => {
+    try {
+        let data = await deletes(arg, false)
+        console.log(data)
+
+        evt.sender.send('DELETE_MOCK_RESULT', {
+            success: true,
+            message: data
+        })
+    } catch (err) {
+        evt.sender.send('DELETE_MOCK_RESULT', {
+            success: false,
+            message: err
+        })
+    }
+})
+
 // 获取正在使用的 mock
 function getMockJSON (id) {
     return new Promise((resolve, reject) => {
@@ -141,6 +158,20 @@ function update (id, data, upsert = false) {
                 }
             }
         )       
+    })
+}
+
+function deletes (query, multi = false) {
+    console.log('Delete Mock:', query)
+    return new Promise((resolve, reject) => {
+        db.remove(query, {multi}, (err, num) => {
+            if (err) {
+                reject(err)
+                return
+            }
+
+            resolve(num)
+        })
     })
 }
 
