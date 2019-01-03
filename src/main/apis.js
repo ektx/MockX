@@ -195,14 +195,16 @@ ipcMain.on('SEARCH_APIS', (evt, arg, arg2) => {
 
 })
 
+// 查寻接口的数据
 function getData (req, res) {
-    console.log(req.headers, req.body)
     let query = Object.assign({}, {
+        // 请求 url 
         url: req.params[0],
+        // 项目编号
         baseUrl: req.params.baseUrl
     })
-    console.log(query)
 
+    // 查寻对应的 api,项目中的url中唯一的
     db.findOne(query, async (err, doc) => {
         let data = `This API Not Find!`
 
@@ -213,13 +215,19 @@ function getData (req, res) {
             })
             return
         }
-        console.log(doc, 222)
+        // 查寻到了 api 基础信息后
         if (doc) {
-            data = await getMockJSON(doc._id, )
+            // 我们通过 api 的 _id 去 mocks数据库中取唯一一个
+            // 使用中的 mock 
+            // {apiID: doc._id, used: true}
+            data = await getMockJSON(doc._id)
 
-            console.log(data, 1111)
+            if (data) {
+                data = data.type === 'txt' ? data.json : mock(data.json) 
+            } else {
+                data = '没有发现使用中的数据'
+            }
 
-            data = data.type === 'txt' ? data.json : mock(data.json) 
         } 
 
         res.send(data)
@@ -229,7 +237,7 @@ function getData (req, res) {
 function postData (req, res) {
     console.log(req.body)
 
-    res.send('sss')
+    res.send('测试中...')
 }
 
 

@@ -12,7 +12,7 @@ let db = new Datastore({
 
 /**
  * arg
- * @param {string} id API的_id
+ * @param {string} apiID API的_id
  * @param {string} method 类型，header params response
  * @param {boolean} used 使用中
  * @param {string} name 名称
@@ -24,7 +24,7 @@ ipcMain.on('ADD_NEW_MOCK', (evt, arg) => {
     console.log('ADD_NEW_MOCK', arg)
     db.insert(
         {
-            id: arg.id,
+            apiID: arg.apiID,
             method: arg.method,
             used: false,
             name: arg.name,
@@ -52,7 +52,7 @@ ipcMain.on('ADD_NEW_MOCK', (evt, arg) => {
 
 ipcMain.on('GET_API_MOCKS', (evt, arg) => {
     // 查找此 api 的 id 的所有 mock
-    db.find({id: arg.id}, (err, docs) => {
+    db.find({apiID: arg.apiID}, (err, docs) => {
         if (err) {
             evt.sender.send('GET_API_MOCKS_RESULT', {
                 success: false,
@@ -76,7 +76,7 @@ ipcMain.on('GET_API_MOCKS', (evt, arg) => {
 ipcMain.on('UPDATE_API_MOCK', async (evt, arg) => {
     try {
         // arg 内的内容是你要更新的内容
-        await update(arg.id, arg)
+        await update(arg._id, arg)
     } catch (err) {
         evt.sender.send('UPDATE_API_MOCK_RESULT', {
             success: false,
@@ -85,10 +85,11 @@ ipcMain.on('UPDATE_API_MOCK', async (evt, arg) => {
     }
 })
 
+// 获取正在使用的 mock
 function getMockJSON (id) {
     return new Promise((resolve, reject) => {
         db.findOne(
-            {id, used: true},
+            {apiID: id, used: true},
             (err, doc) => {
                 if (err) {reject(err); return}
 
@@ -105,7 +106,7 @@ function update (id, data, upsert = false) {
         db.findOne(
             {_id: id},
             // 过滤查寻的结果中字段
-            {_id: 0, createdAt: 0, updatedAt: 0, id: 0},
+            {_id: 0, createdAt: 0, updatedAt: 0, apiID: 0},
             (err, doc) => {
                 if (err) {
                     reject(err)
@@ -130,6 +131,8 @@ function update (id, data, upsert = false) {
                                 reject(err)
                                 return
                             }
+
+                            console.log('UPDATE SUCCESS')
                             resolve(num)
                         }
                     )

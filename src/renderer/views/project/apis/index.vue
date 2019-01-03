@@ -19,42 +19,20 @@
                     :class="api.classes"
                     @click="setCurrent(api)"
                 >
-                    <div class="url">{{api.url}}</div>
-                    <div>
-                        <span :class="['method',api.method]">{{api.method}}</span>
-                        <span class="mock-type">{{api.mockType}}</span>
-                    </div>
+                    <span class="name">{{api.url}}</span>
+                    <span :class="['method',api.method]" :title="api.method"></span>
                 </li>
             </ul>
         </aside>
         <main>
             <header>
                 <h1 :title="title">{{title}}</h1>
-                <div class="set-box">
-                    <el-button size="mini" @click="goList">项目</el-button>
-                    
-                    <template v-if="this.current">
-                        <el-button size="mini" @click="preview = !preview">预览</el-button>
-                        
-                        <el-dropdown class="set-list" size="mini" split-button @click="editApi" @command="removeApi" >
-                            编辑
-                            <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item command='remove'>删除</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </el-dropdown>
-                    </template>
-                </div>
             </header>
             <div class="content-box">
                 <APIProjectInfo v-if="!current" :data="project"/>
                 <APIInfo v-else :data="current"/>
-                <div class="api-info-box">
-                </div>
             </div>
         </main>
-
-        <!-- 预览 mock 内容 -->
-        <previewMock v-model="code" :show.sync="preview"/>
 
         <AddNewAPI v-model="addNewAPI" :project="project" :data="apiData" @update="getAPIs"/>
         
@@ -84,8 +62,6 @@ export default {
             search: '',
             list: [],
             current: null,
-            
-            preview: false,
             code: '',
             // 接口返回内容markdown文档化内容
             // markedInner: '',
@@ -122,14 +98,6 @@ export default {
 
                 // this.formatData()
                 // this.getMarked()
-            }
-        },
-
-        preview (val) {
-            if (val) {
-                this.code = this.current.mockType === 'txt' 
-                    ? this.current.mock 
-                    : this.current.json
             }
         },
 
@@ -170,12 +138,6 @@ export default {
     },
     methods: {
         addApi () {
-            // this.$router.push({
-            //     name: 'editAPI',
-            //     params: Object.assign(this.project, {
-            //         api: 'add'
-            //     })
-            // })
             this.addNewAPI = true
         },
 
@@ -211,15 +173,6 @@ export default {
 
             })
         },
-
-        // getMarked () {
-        //     if (this.current.mockType !== 'txt') {
-        //         this.markedInner = tomd(Object.freeze(this.current.json), 'Body')
-
-        //         if (this.current.headers)
-        //             this.headerMarked = tomd(eval(`(${this.current.headers})`), 'Headers')
-        //     }
-        // },
 
         setCurrent (api) {
             if (this.current && this.current.url === api.url) {
@@ -320,36 +273,36 @@ export default {
 
     li {
         position: relative;
-        padding: 8px 5px;
-        font-size: 11px;
+        display: flex;
+        padding: 5px 3px;
+        align-items: center;
         user-select: none;
         cursor: pointer;
         transition: background 0s ease-in-out;
 
-        .url {
+        .name {
+            flex: 1;
+            margin-left: 5px;
             font-size: 14px;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            font-weight: bold;
             color: #333;
+            max-width: 95%;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .method {
-            text-transform: uppercase;
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 100%;
+            background: currentColor;
 
             &.post {
                 color: #09f;
             }
             &.get,&.GET {
-                color: #4CAF50;
+                color: #8BC34A;
             }
-        }
-
-        .mock-type {
-            margin: 0 0 0 5px;
-            color: #666;
-            text-transform: uppercase;
         }
 
         &::after {
@@ -367,29 +320,5 @@ export default {
         }
     }
 }
-
-.api-info {
-    margin: 10px;
-    font-size: 13px;
-    line-height: 24px;
-
-    li {
-        span {
-            word-break: break-all
-        }
-        
-        &.method {
-            span {
-                text-transform: uppercase;
-            }
-        }
-    }
-
-    label {
-        color: #777;
-        margin-right: 3px;
-    }
-}
-
 </style>
 

@@ -40,10 +40,10 @@ export default {
     data () {
         return {
             // 默认是添加状态
-            type: 'add',
+            status: 'add',
             params: {
+                apiID: '',
                 name: 'new mock',
-                id: '',
                 method: '',
                 type: 'json',
                 json: '',
@@ -83,9 +83,24 @@ export default {
         }
     },
     mounted () {
-        console.log(this.$route.params)
-        this.params.method = this.$route.params.method
-        this.params.id = this.$route.params.id
+        if ('mockId' in this.$route.params) {
+            this.status = 'edit'
+            for (let key in this.params) {
+                if (key in this.$route.params.data) {
+                    if (key === 'data') {
+                        this.codeInner = this.$route.params.data[key]
+                    } else {
+                        this.params[key] = this.$route.params.data[key]
+                    }
+                }
+            }
+
+            this.params._id = this.$route.params.data._id
+        } else {
+            this.status = 'add'
+            this.params.method = this.$route.params.method
+            this.params.apiID = this.$route.params.id
+        }
 
         ipcRenderer.on('ADD_NEW_MOCK_RESULT', (evt, res) => {
             if (res.success) {
@@ -115,7 +130,6 @@ export default {
                         option = eval(this.params.data);
                         break;
                     case 'json':
-
                         option = eval(`(${this.params.data})`)
                         break;
                     default:
@@ -135,22 +149,15 @@ export default {
             this.getMockJSON()
 
             if (!this.hasError) {
-                ipcRenderer.send('ADD_NEW_MOCK', this.params)
+                if (this.status === 'add') {
+                    ipcRenderer.send('ADD_NEW_MOCK', this.params)
+                } else {
+                    console.log('UPDATE...', this.params)
+                    ipcRenderer.send('UPDATE_API_MOCK', {
+                        ...this.params
+                    })
+                }
             }
-        },
-
-        save () {
-            Object.assign(this.params, {
-                projectId: this.$route.params._id,
-                baseUrl: this.$route.params.baseUrl
-            })
-            console.log(this.params, 'save')
-            ipcRenderer.send('SAVE_API', this.params)
-        },
-
-        update () {
-            console.warn(this.params)
-            ipcRenderer.send('UPDATE_API', this.params)
         },
 
         // 设置代码 mode
@@ -171,8 +178,7 @@ export default {
         }
     },
     beforeRouteLeave (to, from , next) {
-        ipcRenderer.removeAllListeners('SAVE_API_RESULT')
-        ipcRenderer.removeAllListeners('UPDATE_API_RESULT')
+        ipcRenderer.removeAllListeners('ADD_NEW_MOCK_RESULT')
 
         next()
     }
@@ -240,9 +246,8 @@ export default {
         }
     }
 }
-</style>
-<style>
-.el-dialog__body {
+
+.api-edit-mod /deep/ .el-dialog__body {
     height: 60vh;
 }
 </style>

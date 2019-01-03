@@ -1,6 +1,5 @@
 <template>
     <div class="api-info-box">
-        {{data}}
         <h3>
             <span>基础信息</span>
             <i class="el-icon-edit" title="编辑基础信息" @click="editApi"></i>
@@ -16,13 +15,24 @@
         </h3>
         <div class="radio-list-box">
             <ul class="mock-list-box">
-                <li v-for="item in resList" :key="item._id">{{item}}
-                    <el-checkbox :value="item.used" @change="resCurrent = item">{{item.name}}</el-checkbox>
-                    <i class="el-icon-edit" title="编辑" @click="addNewMock('respinse', false, item._id)"></i>
+                <li v-for="item in resList" :key="item._id">
+                    <main>
+                        <p>
+                            <el-checkbox :value="item.used" @change="updateResCurrent(item)"></el-checkbox>
+                            <span class="name">{{item.name}}</span>
+                        </p>
+                        <p>
+                            <span>类型: {{item.type}}</span>
+                            <span>更新于: {{item.updatedAt}}</span>
+                        </p>
+                    </main>
+                    <aside>
+                        <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
+                    </aside>
                 </li>
             </ul>
             <div class="setting-box">
-                <el-button size="mini" @click="addNewMock('response', true, data._id)">添加</el-button>
+                <el-button size="mini" @click="toEditMock('response', true, data)">添加</el-button>
             </div>
         </div>
     </div>
@@ -79,7 +89,8 @@ export default {
 
             resList: {},
             resCheckbox: null,
-            resCurrent: null
+            resCurrent: null,
+            resCurrentStatus: 'auto'
         }
     },
     computed: {
@@ -99,19 +110,21 @@ export default {
 
                 // 获取所有的 mocks
                 ipcRenderer.send('GET_API_MOCKS', {
-                    id: this.data._id
+                    apiID: this.data._id
                 })
             },
             immediate: true
         },
 
         resCurrent (val, old) {
+            if (this.resCurrentStatus === 'auto') return
+            // 如果 val 或 old 都没有内容，我们不更新
             if (!val) return
 
             if (old) {
                 old.used = false
                 ipcRenderer.send('UPDATE_API_MOCK', {
-                    id: old._id,
+                    _id: old._id,
                     used: false
                 })
             
@@ -119,9 +132,11 @@ export default {
             
             val.used = true
             ipcRenderer.send('UPDATE_API_MOCK', {
-                id: val._id,
+                _id: val._id,
                 used: val.used
             })
+            // 恢复状态 防止自动更新
+            this.resCurrentStatus = 'auto'
         }
     },
     mounted () {
@@ -156,15 +171,16 @@ export default {
             console.log(this.data, this.$parent.apiData)
         },
 
-        addNewMock (type, isAdd, id) {
+        toEditMock (type, isAdd, data) {
             let params = {
                 method: type
             }
 
             if (isAdd) {
-                params.id = id
+                params.id = data._id
             } else {
-                params.mockId = id
+                params.mockId = data._id,
+                params.data = data
             }
 
             this.$router.push({
@@ -173,9 +189,10 @@ export default {
             })
         },
 
-        editMock () {
-
-        }
+        updateResCurrent (item) {
+            this.resCurrentStatus = 'update'
+            this.resCurrent = item
+        },
 
         // setResCheckBox (item) {
         //     console.log(item)
@@ -228,8 +245,39 @@ export default {
 
 .mock-list-box {
     li {
-        line-height: 32px;
+        display: flex;
+        flex-direction: row;
         border-bottom: 1px solid #eee;
+
+        main {
+            flex: 1;
+            margin: 3px 0;
+
+            .name {
+                font-size: 14px;
+                line-height: 2em;
+                color: #333;
+            }
+
+            span {
+                margin-right: 10px;
+            }
+        }
+
+        aside {
+            line-height: 50px;
+
+            i {
+                font-size: 16px;
+                color: #333;
+                cursor: pointer;
+
+                &:hover {
+                    color: #09f;
+                }
+            }
+        }
+
     }
 }
 .setting-box {
