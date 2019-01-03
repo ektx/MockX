@@ -21,7 +21,7 @@ let db = new Datastore({
  * @param {string} data 具体的模拟内容
  */
 ipcMain.on('ADD_NEW_MOCK', (evt, arg) => {
-    console.log(arg)
+    console.log('ADD_NEW_MOCK', arg)
     db.insert(
         {
             id: arg.id,
@@ -72,23 +72,11 @@ ipcMain.on('GET_API_MOCKS', (evt, arg) => {
 /**
  * arg
  * @param {string} id mock的_id
- * @param {string} api api的_id
  */
 ipcMain.on('UPDATE_API_MOCK', async (evt, arg) => {
     try {
+        // arg 内的内容是你要更新的内容
         await update(arg.id, arg)
-
-        // db.find(
-        //     {id: arg.api, used: true},
-        //     (err, docs) => {
-        //          let result = docs.map(item => {
-        //             if (item._id !== arg.id) {
-        //                 return item
-        //             } return null
-        //         })
-        //         console.log(docs, result)
-        //     }
-        // )
     } catch (err) {
         evt.sender.send('UPDATE_API_MOCK_RESULT', {
             success: false,
@@ -102,7 +90,6 @@ function getMockJSON (id) {
         db.findOne(
             {id, used: true},
             (err, doc) => {
-                console.log('mock', doc)
                 if (err) {reject(err); return}
 
                 resolve(doc)
@@ -143,7 +130,6 @@ function update (id, data, upsert = false) {
                                 reject(err)
                                 return
                             }
-
                             resolve(num)
                         }
                     )

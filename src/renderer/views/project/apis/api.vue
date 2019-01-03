@@ -18,10 +18,11 @@
             <ul class="mock-list-box">
                 <li v-for="item in resList" :key="item._id">{{item}}
                     <el-checkbox :value="item.used" @change="resCurrent = item">{{item.name}}</el-checkbox>
+                    <i class="el-icon-edit" title="编辑" @click="addNewMock('respinse', false, item._id)"></i>
                 </li>
             </ul>
             <div class="setting-box">
-                <el-button size="mini" @click="addNewMock('response')">添加</el-button>
+                <el-button size="mini" @click="addNewMock('response', true, data._id)">添加</el-button>
             </div>
         </div>
     </div>
@@ -105,7 +106,7 @@ export default {
         },
 
         resCurrent (val, old) {
-            val.used = true
+            if (!val) return
 
             if (old) {
                 old.used = false
@@ -116,6 +117,7 @@ export default {
             
             }
             
+            val.used = true
             ipcRenderer.send('UPDATE_API_MOCK', {
                 id: val._id,
                 used: val.used
@@ -154,15 +156,26 @@ export default {
             console.log(this.data, this.$parent.apiData)
         },
 
-        addNewMock (type) {
+        addNewMock (type, isAdd, id) {
+            let params = {
+                method: type
+            }
+
+            if (isAdd) {
+                params.id = id
+            } else {
+                params.mockId = id
+            }
+
             this.$router.push({
                 name: 'editMock',
-                params: {
-                    method: type,
-                    id: this.data._id
-                }
+                params
             })
         },
+
+        editMock () {
+
+        }
 
         // setResCheckBox (item) {
         //     console.log(item)
