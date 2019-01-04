@@ -6,7 +6,7 @@
             :class="item.key"
             @click="click(item)"
         >
-            <label>{{item.label}}: </label>
+            <label>{{item.label}}</label>
             <span>{{item.value}}</span>
         </li>
     </ul>
@@ -65,11 +65,19 @@ export default {
 
 <style lang="scss">
 .mockx-ul-list-mod {
+    margin: 10px 0;
     font-size: 13px;
-    line-height: 1.7em;
+    line-height: 1.5em;
+
+    li {
+        margin-bottom: 1em;
+    }
 
     label {
+        display: block;
         color: #333;
+        font-weight: bold;
+        margin-right: 5px;
     }
     span {
         color: #666;
