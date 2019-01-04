@@ -56,7 +56,8 @@ export default {
             ],
             params: {
                 name: '',
-                description: ''
+                description: '',
+                online: ''
             },
             rules: {
                 name: [
@@ -99,6 +100,8 @@ export default {
             if (res.success) {
                ipcRenderer.send('GET_PROJECTS')
                this.$message.success('删除成功！')
+            } else {
+                this.$message.error(res.message)
             }
         })
 

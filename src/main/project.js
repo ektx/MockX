@@ -40,10 +40,31 @@ ipcMain.on('SAVE_PROJECT', (evt, arg) => {
                 message: '已经存在此项目'
             })
         } else {
-            db.insert(Object.assign(arg, {
+            let data = {
+                // 名称
+                name: '',
+                // 线上地址
+                online: '',
+                // 简介
+                description: '',
                 baseUrl: `project${+ new Date}`
-            }), (err, docs)=> {
-                if (err) return
+            }
+
+            // 只存在以上的内容
+            for (let key in data) {
+                if (Reflect.has(arg, key)) {
+                    data[key] = arg[key]
+                }
+            }
+
+            db.insert(data, (err, docs)=> {
+                if (err) {
+                    evt.sender.send('GET_PROJECTS_RESULT', {
+                        success: false,
+                        message: err
+                    })
+                    return
+                }
                 
                 // 发送所有项目
                 getProjects(evt)
@@ -55,7 +76,9 @@ ipcMain.on('SAVE_PROJECT', (evt, arg) => {
 //响应搜索事件
 ipcMain.on('SEARCH_PROJECTS',(evt, arg) => {
 
-    db.find({name: { $regex: new RegExp(arg, 'i') }}).sort({ctime: -1}).exec((err, docs) => {
+    db.find(
+        {name: { $regex: new RegExp(arg, 'i') }}
+    ).sort({ctime: -1}).exec((err, docs) => {
         if (err) return
 
         evt.sender.send('SEARCH_PROJECTS_RESULT', {
@@ -68,8 +91,10 @@ ipcMain.on('SEARCH_PROJECTS',(evt, arg) => {
 
 //响应删除事件
 ipcMain.on('REMOVE_PROJECT',(evt, arg) => {
-
-    db.remove({name: { $regex: new RegExp(arg.name) }}, {}, function (err, numRemoved) {
+console.log(arg)
+    db.remove(
+        {name: { $regex: new RegExp(arg.name) }
+    }, {}, function (err, numRemoved) {
     
         if (err) return
 
@@ -78,7 +103,7 @@ ipcMain.on('REMOVE_PROJECT',(evt, arg) => {
             data: numRemoved
         })
 
-    });
+    })
     
 })
 

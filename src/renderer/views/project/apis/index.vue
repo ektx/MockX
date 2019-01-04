@@ -216,15 +216,17 @@ export default {
 
         header {
             width: 100%;
-            padding: 20px 10px 0;
+            padding: 20px 10px 10px;
             box-sizing: border-box;
             -webkit-app-region: drag;
 
             h1 {
                 font-size: 18px;
                 font-weight: 400;
+                color: #0a0a0a;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                text-transform: capitalize;
                 white-space: nowrap;
             }
             .set-box {

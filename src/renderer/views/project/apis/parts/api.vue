@@ -1,40 +1,52 @@
 <template>
     <div class="api-info-box">
-        <h3>
-            <span>基础信息</span>
-            <i class="el-icon-edit" title="编辑基础信息" @click="editApi"></i>
-        </h3>
-        <ul-list :data="list" :format="apiFormat"/>
+        <div class="base-info-box">
+            <h3>
+                <span>基础信息</span>
+                <i class="el-icon-edit" title="编辑基础信息" @click="editApi"></i>
+            </h3>
+            <ul-list :data="list" :format="apiFormat"/>
+        </div>
 
-        <h3>
-            <span>请求头信息</span>
-        </h3>        
-        <h3>请求参数信息</h3>
-        <h3>
-            <span>响应信息</span>
-        </h3>
-        <div class="radio-list-box">
-            <ul class="mock-list-box">
-                <li v-for="item in resList" :key="item._id">
-                    <main>
-                        <p>
-                            <el-checkbox :value="item.used" @change="updateResCurrent(item)"></el-checkbox>
-                            <span class="name">{{item.name}}</span>
-                        </p>
-                        <p>
-                            <span>类型: {{item.type}}</span>
-                            <span>更新于: {{item.updatedAt}}</span>
-                        </p>
-                    </main>
-                    <aside>
-                        <i class="el-icon-view" @click="priviewData(item)"></i>
-                        <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
-                        <i class="el-icon-delete" @click="delThisMock(item)"></i>
-                    </aside>
-                </li>
-            </ul>
-            <div class="setting-box">
-                <el-button size="mini" @click="toEditMock('response', true, data)">添加</el-button>
+        <div class="headers-box">
+            <h3>
+                <span>请求头信息</span>
+            </h3>        
+        </div>
+
+        <div class="params-box">
+            <h3>
+                <span>请求参数信息</span>
+            </h3>
+        </div>
+
+        <div class="response-box">
+            <h3>
+                <span>响应信息</span>
+            </h3>
+            <div class="radio-list-box">
+                <ul class="mock-list-box">
+                    <li v-for="item in resList" :key="item._id">
+                        <main>
+                            <p>
+                                <el-checkbox :value="item.used" @change="updateResCurrent(item)"></el-checkbox>
+                                <span class="name">{{item.name}}</span>
+                            </p>
+                            <p>
+                                <span>类型: {{item.type}}</span>
+                                <span>更新于: {{item.updatedAt}}</span>
+                            </p>
+                        </main>
+                        <aside>
+                            <i class="el-icon-view" @click="priviewData(item)"></i>
+                            <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
+                            <i class="el-icon-delete" @click="delThisMock(item)"></i>
+                        </aside>
+                    </li>
+                </ul>
+                <div class="setting-box">
+                    <el-button size="mini" @click="toEditMock('response', true, data)">添加</el-button>
+                </div>
             </div>
         </div>
 
@@ -248,14 +260,22 @@ export default {
 <style lang="scss" scoped>
 .api-info-box {
     margin: 0 10px;
+
+    & > div {
+        margin-bottom: 2em;
+    }
     
     h3 {
-        margin: 10px 0;
+        position: sticky;
+        top: 0;
+        padding: 0 0 8px;
         border-bottom: 1px solid #eee;
+        background-color: #fff;
 
         span {
-            font-size: 18px;
+            font-size: 16px;
             color: #333;
+            font-weight: 400;
         }
 
         i {

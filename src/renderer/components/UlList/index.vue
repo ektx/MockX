@@ -76,11 +76,11 @@ export default {
     label {
         display: block;
         color: #333;
-        font-weight: bold;
+        font-size: 14px;
         margin-right: 5px;
     }
     span {
-        color: #666;
+        color: #606060;
         word-break: break-all;
     }
 }
