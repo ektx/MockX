@@ -9,6 +9,14 @@ let db = new Datastore({
     timestampData: true
 })
 
+// 设置项目名称为索引与唯一性
+db.ensureIndex({
+    fieldName: 'name',
+    unique: true
+}, err => {
+    // console.log('Project db ensureIndex:', err)
+})
+
 /**
  * 查寻所有的项目
  * @param {event} evt ipcMain事件
@@ -31,45 +39,39 @@ export default {
 
 // 响应保存事件
 ipcMain.on('SAVE_PROJECT', (evt, arg) => {
-    db.findOne({name: arg.name}, (err, docs) => {
-        if (err) return
+    let data = {
+        // 名称
+        name: '',
+        // 线上地址
+        online: '',
+        // 简介
+        description: '',
+        // 项目编号
+        baseUrl: `project${+ new Date}`
+    }
 
-        if (docs) {
+    // 只存在以上的内容
+    for (let key in data) {
+        if (Reflect.has(arg, key)) {
+            data[key] = arg[key]
+        }
+    }
+
+    db.insert(data, (err, docs)=> {
+        if (err) {
+            if (err.errorType === 'uniqueViolated') {
+                err = '此项目已经存在'
+            }
+
             evt.sender.send('GET_PROJECTS_RESULT', {
                 success: false,
-                message: '已经存在此项目'
+                message: err
             })
-        } else {
-            let data = {
-                // 名称
-                name: '',
-                // 线上地址
-                online: '',
-                // 简介
-                description: '',
-                baseUrl: `project${+ new Date}`
-            }
-
-            // 只存在以上的内容
-            for (let key in data) {
-                if (Reflect.has(arg, key)) {
-                    data[key] = arg[key]
-                }
-            }
-
-            db.insert(data, (err, docs)=> {
-                if (err) {
-                    evt.sender.send('GET_PROJECTS_RESULT', {
-                        success: false,
-                        message: err
-                    })
-                    return
-                }
-                
-                // 发送所有项目
-                getProjects(evt)
-            })
+            return
         }
+        
+        // 发送所有项目
+        getProjects(evt)
     })
 })
 
@@ -89,22 +91,30 @@ ipcMain.on('SEARCH_PROJECTS',(evt, arg) => {
     
 })
 
-//响应删除事件
+// 响应删除事件
 ipcMain.on('REMOVE_PROJECT',(evt, arg) => {
-console.log(arg)
     db.remove(
-        {name: { $regex: new RegExp(arg.name) }
-    }, {}, function (err, numRemoved) {
-    
-        if (err) return
+        {_id: arg._id }, 
+        {}, 
+        (err, numRemoved) => {
+            if (err) {
+                evt.sender.send('REMOVE_PROJECT_RESULT', {
+                    success: false,
+                    data: err
+                })
+                return
+            }
 
-        evt.sender.send('REMOVE_PROJECT_RESULT', {
-            success: true,
-            data: numRemoved
-        })
+            // 删除apis
 
-    })
-    
+            // 删除 mocks
+
+            evt.sender.send('REMOVE_PROJECT_RESULT', {
+                success: true,
+                data: numRemoved
+            })
+        }
+    ) 
 })
 
 //响应修改事件
