@@ -18,14 +18,14 @@
         </div>
 
         <div class="add-params" v-if="addParams">
-            <eTable @change='urlParamsChange' ref="urlParams"></eTable>
+            <eTable @change='urlParamsChange' :data='urlParams' ref="urlParams"></eTable>
         </div>
 
         <div class="custom-params">
             <el-tabs v-model="customActiveName">
                 <el-tab-pane label="Headers" name="Headers">
 
-                    <eTable :data='customHeaders'></eTable>
+                    <eTable @change='(data) => customHeaders=data'></eTable>
 
                 </el-tab-pane>
                 <el-tab-pane label="Body" name="Body" :disabled='requestParams.type==="GET"'>
@@ -35,7 +35,7 @@
                         <el-radio label="x-www-form-urlencoded">x-www-form-urlencoded</el-radio>
                     </el-radio-group>
 
-                    <eTable :data='customBodys'></eTable>
+                    <eTable @change='(data) => customBodys=data'></eTable>
 
                 </el-tab-pane>
             </el-tabs>
@@ -93,23 +93,15 @@ export default {
     data () {
         return {
             requestParams:{
-                url:'',
+                url:'http://anhaooray.oicp.net:18888/login/doLogin',
                 type: 'POST',
                 headers: new Object(),
                 data: new Object()
             },
+            urlParams:[{}],
             customActiveName: 'Headers',
-            customHeaders: [{
-                key: 'Content-Type',
-                value: 'application/x-www-form-urlencoded'
-            }],
-            customBodys: [{
-                key: 'userName',
-                value: 'wangruirui'
-            },{
-                key: 'password',
-                value: 'a11111111'
-            }],
+            customHeaders: [],
+            customBodys: [],
             customBodyType: 'x-www-form-urlencoded',
             responseActiveName: 'Body',
             aceOptions: {
@@ -133,25 +125,24 @@ export default {
         },
         'requestParams.url'(val){
             this.$emit('urlChange', val)
-            // const data = []
-            // if (val.split('?')[1]) {
-            //     const urlParams= val.split('?')[1].split('&');
-            //     urlParams.forEach(element => {
-            //         console.log(element)
-            //         data.push({
-            //             key:element.split('=')[0],
-            //             value:element.split('=')[1]
-            //         })
-            //     });
-            //     this.$refs.urlParams && (this.$refs.urlParams.data = data)
-            //     // this.$refs.urlParams.selections = data
-            // }
+            const data = []
+            if (val.split('?')[1]) {
+                const urlParams= val.split('?')[1].split('&');
+                urlParams.forEach(element => {
+                    data.push({
+                        key:element.split('=')[0],
+                        value:element.split('=')[1]
+                    })
+                });
+                data.push({})
+                this.urlParams = data
+            }
         }
     },
     methods: {
         urlParamsChange ( dataJson ) {
             let params = ''
-            dataJson.forEach( item => {
+            dataJson && dataJson.forEach( item => {
                 if (item.key) {
                     params += '&' + item.key
                     if (item.value) {
@@ -174,12 +165,24 @@ export default {
                 return false
             }
 
+            ipcRenderer.removeAllListeners('SEND_REQUEST_RESULT')
+
+            function isJSON(str) {
+                if (typeof str == 'string') {
+                    try {
+                        JSON.parse(str);
+                        return true;
+                    } catch(e) {
+                        return false;
+                    }
+                }  
+            }
+
             if (this.name === this.chooseName) {
                 ipcRenderer.on('SEND_REQUEST_RESULT', (evt, res) => {
-                    console.log(res)
 
                     this.loading = false
-                    this.codeInner =  JSON.stringify(JSON.parse(res.data.chunk), null, 4)
+                    this.codeInner =  JSON.stringify(JSON.parse(res.data.data), null, 4)
                     this.headers = res.data.res.headers
                     if (res.data.res.headers['set-cookie']) {
                         this.cookiesData=[{
@@ -190,18 +193,29 @@ export default {
                     }
                     
                 })
-            } else {
-                ipcRenderer.removeAllListeners('SEND_REQUEST_RESULT')
             }
             
-
-            this.customHeaders.forEach( item => {
-                this.requestParams.headers[item.key] = item.value
-            });
-            this.customBodys.forEach( item => {
-                this.requestParams.data[item.key] = item.value
-            });
-
+            if (this.customHeaders.length>0) {
+                this.customHeaders.forEach( item => {
+                    if (item.key && item.value) {
+                        this.requestParams.headers[item.key] = item.value
+                    }
+                });
+            } else {
+                this.requestParams.headers = {}
+            }
+            
+            if (this.customBodys.length>0) {
+                this.customBodys.forEach( item => {
+                    if (item.key && item.value) {
+                        this.requestParams.data[item.key] = item.value
+                    }
+                });
+            } else {
+                this.requestParams.data = {}
+            }
+            
+            console.log(this.requestParams)
             this.loading = true
             ipcRenderer.send('SEND_REQUEST', this.requestParams)
 

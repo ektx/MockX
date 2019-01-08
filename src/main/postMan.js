@@ -27,15 +27,17 @@ ipcMain.on('SEND_REQUEST', (evt, arg) => {
         // console.log('HEADERS: ' + JSON.stringify(res.headers));
         
         res.setEncoding('utf8');
+        let data = ''
         res.on('data', function (chunk) {
             console.log('BODY: ' + chunk);
-
+            data += chunk
+        })
+        .on('end', function() {
             evt.sender.send('SEND_REQUEST_RESULT', {
                 success: true,
-                data: {res, chunk}
+                data: {res, data}
             })
-
-        }); 
+        })
 
     });  
       

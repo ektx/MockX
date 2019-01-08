@@ -33,6 +33,10 @@
 export default {
     name: 'Etable',
     props: {
+        // data: {
+        //     type: Array,
+        //     default: () => []
+        // },
         columns: {
             type: Array,
             default: () => [{
@@ -53,9 +57,8 @@ export default {
     watch: {
         data:{
             handler(value){
-                console.log(value)
                 value.forEach( item => {
-                    this.$refs.multipleTable.toggleRowSelection( item ,true )
+                    this.$refs.multipleTable.toggleRowSelection( item, true )
                 });
             },
             deep: true
@@ -81,6 +84,7 @@ export default {
         },
         selectionChange (selection) {
             this.selections = selection;
+            console.log(this.selections)
             this.$emit("change",this.selections);
         }
     }

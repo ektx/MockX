@@ -9,7 +9,9 @@
             </nav>
         </aside>
         <main class="mock-main-display">
-            <router-view></router-view>
+            <keep-alive include='postMan'>
+                <router-view></router-view>
+            </keep-alive>
         </main>
     </div>
 </template>
@@ -38,12 +40,12 @@ export default {
                     icon: 'icon-file'
                 },
                 {
-                    label: 'postMan',
+                    label: 'PostMan',
                     to: '/postMan',
                     icon: 'icon-deliver'
                 },
             ],
-            current: null
+            current: null,
         }
     },
     watch: {

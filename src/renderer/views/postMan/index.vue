@@ -22,7 +22,7 @@
 <script>
 import { ipcRenderer } from 'electron'
 export default {
-    name: 'post-man',
+    name: 'postMan',
     data () {
         return {
             editableTabsValue: '1',
@@ -96,4 +96,5 @@ export default {
         }
     }
 }
+
 </style>
