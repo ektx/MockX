@@ -110,6 +110,13 @@ export default {
                 this.$message.success('保存成功')
             } else this.$message.error(res.message)
         })
+
+        ipcRenderer.on('UPDATE_API_MOCK_RESULT', (evt, res) => {
+            if (res.success) {
+                this.$router.go(-1)
+                this.$message.success('更新成功')
+            } else this.$message.error(res.message)
+        })
     },
     methods: {
         getMockJSON () {
@@ -181,6 +188,7 @@ export default {
     },
     beforeRouteLeave (to, from , next) {
         ipcRenderer.removeAllListeners('ADD_NEW_MOCK_RESULT')
+        ipcRenderer.removeAllListeners('UPDATE_API_MOCK_RESULT')
 
         next()
     }

@@ -79,6 +79,10 @@ ipcMain.on('UPDATE_API_MOCK', async (evt, arg) => {
     try {
         // arg 内的内容是你要更新的内容
         await update(arg._id, arg)
+        evt.sender.send('UPDATE_API_MOCK_RESULT', {
+            success: true,
+            message: '更新成功'
+        })
     } catch (err) {
         evt.sender.send('UPDATE_API_MOCK_RESULT', {
             success: false,
