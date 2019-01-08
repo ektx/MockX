@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import express from 'express'
 import bodyParser from 'body-parser'
 import project from './project.js'
-import apis from './apis.js'
+import {getData, postData} from './apis.js'
 import './mock.js'
 
 const app = express()
@@ -14,8 +14,8 @@ app.use(bodyParser.urlencoded({
     limit: '50mb'
 }))
 
-app.get('/:baseUrl/*',  apis.getData)
-app.post('/:baseUrl/*', apis.postData)
+app.get('/:baseUrl/*',  getData)
+app.post('/:baseUrl/*', postData)
 
 // 接受客户端启动服务器命令
 ipcMain.on('START_SERVE', (evt, arg) => {

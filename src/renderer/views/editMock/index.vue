@@ -42,6 +42,7 @@ export default {
             // 默认是添加状态
             status: 'add',
             params: {
+                project: '',
                 apiID: '',
                 name: 'new mock',
                 method: '',
@@ -99,6 +100,7 @@ export default {
         } else {
             this.status = 'add'
             this.params.method = this.$route.params.method
+            this.params.projectID = this.$route.params.projectID
             this.params.apiID = this.$route.params.id
         }
 

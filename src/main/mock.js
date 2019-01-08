@@ -12,6 +12,7 @@ let db = new Datastore({
 
 /**
  * arg
+ * @param {string} projectID 项目的baseUrl
  * @param {string} apiID API的_id
  * @param {string} method 类型，header params response
  * @param {boolean} used 使用中
@@ -23,7 +24,8 @@ let db = new Datastore({
 ipcMain.on('ADD_NEW_MOCK', (evt, arg) => {
     console.log('ADD_NEW_MOCK', arg)
     db.insert(
-        {
+        {   
+            projectID: arg.projectID,
             apiID: arg.apiID,
             method: arg.method,
             used: false,
@@ -176,5 +178,6 @@ function deletes (query, multi = false) {
 }
 
 export {
-    getMockJSON
+    getMockJSON,
+    deletes
 }

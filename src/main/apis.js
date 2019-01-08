@@ -3,12 +3,17 @@ import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
 import mock from '../common/mocks/index.js'
-import { getMockJSON } from './mock.js'
+import { getMockJSON, deletes as delMocks } from './mock.js'
 
 let db = new Datastore({
     filename: path.join(os.homedir(), 'mock-x/db/apis.db'),
     autoload: true,
     timestampData: true
+})
+
+db.ensureIndex({
+    fieldName: 'id',
+    unique: true
 })
 
 // 准备废弃
@@ -70,16 +75,22 @@ ipcMain.on('SAVE_API', (evt, arg) => {
  * @returns 返回成功后_id或失败信息
  */
 ipcMain.on('ADD_API', (evt, arg) => {
-    console.log(arg)
     // 验证传参
     let result = true
     let message = []
+    let params = {
+        url: '',
+        method: 'get',
+        description: '',
+        baseUrl: ''
+    }
 
     if (!arg.baseUrl) {
         result = false
         message.push('没有 baseUrl')
     }
-    if (!arg.url) {
+
+    if (!result || !arg.url) {
         result = false
         message.push('没有 url')
     }
@@ -92,43 +103,33 @@ ipcMain.on('ADD_API', (evt, arg) => {
         return
     }
 
-    db.findOne(
-        {baseUrl: arg.baseUrl, url: arg.url},
-        (err, doc) => {
-            if (err) {
-                evt.sender.send('ADD_API_RESULT', {
-                    success: false,
-                    message: '出现未知错误',
-                    data: err
-                })
-                return
-            }
-
-            if (doc) {
-                evt.sender.send('ADD_API_RESULT', {
-                    success: false,
-                    message: '此 API 地址已经存在'
-                })
-            } else {
-                db.insert(arg, (err, docs) => {
-                    if (err) {
-                        evt.sender.send('ADD_API_RESULT', {
-                            success: false,
-                            message: '出现未知错误',
-                            data: err
-                        })
-                        return
-                    }
-
-                    evt.sender.send('ADD_API_RESULT', {
-                        success: true,
-                        message: '添加成功',
-                        data: docs
-                    })
-                })
-            }
+    // 赋值
+    for (let key in params) {
+        if (Reflect.has(arg, key)) {
+            params[key] = arg[key].trim()
         }
-    )
+    }
+
+    params.id = params.baseUrl + params.url
+
+    db.insert(params, (err, docs) => {
+        if (err) {
+            err = err.errorType === 'uniqueViolated' ? 'API 已经存在' : '出现未知错误'
+
+            evt.sender.send('ADD_API_RESULT', {
+                success: false,
+                message: err
+            })
+            return
+        }
+
+        evt.sender.send('ADD_API_RESULT', {
+            success: true,
+            message: '添加成功',
+            data: docs
+        })
+    })
+  
 })
 
 /**
@@ -166,19 +167,25 @@ ipcMain.on('UPDATE_API', (evt, arg) => {
     )
 })
 
-//响应删除api操作
+// 响应删除api操作
 ipcMain.on('REMOVE_API', (evt,arg) => {
+    console.log('REMOVE_API:', arg)
+    db.remove({_id: arg._id}, {}, async (err, numRemoved) => {
+        if (err) {
+            evt.sender.send('REMOVE_API_RESULT', {
+                success: false,
+                data: err
+            })
+            return
+        }
 
-    db.remove({_id: { $regex: new RegExp(arg._id) }}, {}, function (err, numRemoved) {
-    
-        if (err) return
+        await delMocks({apiID: arg._id}, true)
 
         evt.sender.send('REMOVE_API_RESULT', {
             success: true,
             data: numRemoved
         })
-
-    });
+    })
 })
 
 //响应搜索api操作
@@ -194,6 +201,20 @@ ipcMain.on('SEARCH_APIS', (evt, arg, arg2) => {
     })
 
 })
+
+function deleteAPI (query, multi = false) {
+    console.log('Delete API:', query)
+    return new Promise((resolve, reject) => {
+        db.remove(query, {multi}, (err, num) => {
+            if (err) {
+                reject(err)
+                return
+            }
+
+            resolve(num)
+        })
+    })
+}
 
 // 查寻接口的数据
 function getData (req, res) {
@@ -241,7 +262,8 @@ function postData (req, res) {
 }
 
 
-export default {
+export {
     getData,
-    postData
+    postData,
+    deleteAPI
 }

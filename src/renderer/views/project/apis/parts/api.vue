@@ -23,6 +23,7 @@
         <div class="response-box">
             <h3>
                 <span>响应信息</span>
+                <i class="el-icon-plus" title="添加" @click="toEditMock('response', true, data)"></i>
             </h3>
             <div class="radio-list-box">
                 <ul class="mock-list-box">
@@ -44,9 +45,6 @@
                         </aside>
                     </li>
                 </ul>
-                <div class="setting-box">
-                    <el-button size="mini" @click="toEditMock('response', true, data)">添加</el-button>
-                </div>
             </div>
         </div>
 
@@ -205,7 +203,8 @@ export default {
 
         toEditMock (type, isAdd, data) {
             let params = {
-                method: type
+                method: type,
+                projectID: this.data.baseUrl
             }
 
             if (isAdd) {
@@ -338,7 +337,5 @@ export default {
 
     }
 }
-.setting-box {
-    margin: 1em 0;
-}
+
 </style>

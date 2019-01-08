@@ -9,7 +9,7 @@
                     clearable 
                     size="mini"
                 >
-                    <el-button slot="append" icon="el-icon-plus" @click="addApi"></el-button>
+                    <el-button slot="append" icon="el-icon-plus" @click="addNewAPI = true"></el-button>
                 </el-input>
             </header>
             <ul class="apis-list">
@@ -21,6 +21,7 @@
                 >
                     <span class="name">{{api.url}}</span>
                     <span :class="['method',api.method]" :title="api.method"></span>
+                    <i class="el-icon-error" @click="removeApi(api)"></i>
                 </li>
             </ul>
         </aside>
@@ -41,8 +42,6 @@
 
 <script>
 import { ipcRenderer } from 'electron'
-import { mapState } from 'vuex'
-import { tomd } from '../../../../common/mocks/index.js'
 import APIProjectInfo from './parts/project.vue'
 import APIInfo from './parts/api.vue'
 import AddNewAPI from './parts/addAPI.vue'
@@ -62,7 +61,7 @@ export default {
             search: '',
             list: [],
             current: null,
-            code: '',
+            // code: '',
             // 接口返回内容markdown文档化内容
             // markedInner: '',
             // 请求头信息 markdown 文档化内容
@@ -110,10 +109,7 @@ export default {
 
         ipcRenderer.on('GET_ALL_APIS_RESULT', (evt, res) => {
             if (res.success) {
-                if (res.data.length) {
-                    this.list = res.data
-                    // this.current = this.list[0]
-                }
+                this.list = res.data
             } else {
                 this.$message.error(res.message)
             }
@@ -134,38 +130,19 @@ export default {
 
     },
     methods: {
-        addApi () {
-            this.addNewAPI = true
-        },
-
-        editApi () {
-            this.$router.push({
-                name: 'editAPI',
-                params: Object.assign({}, this.current, {
-                    api: 'edit'
-                })
-            })
-        },
-
         getAPIs () {
             ipcRenderer.send('GET_ALL_APIS', {
                 baseUrl: this.project.baseUrl
             })
         },
 
-        goList () {
-            this.$router.push({name: 'projectList'})
-        },
-
-        removeApi (type) {
-
-            type === 'remove' && 
+        removeApi (api) {
             this.$confirm(`此操作将永久删除, 是否继续?`, '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                ipcRenderer.send('REMOVE_API', this.current)
+                ipcRenderer.send('REMOVE_API', api)
             }).catch(() => {
 
             })
@@ -301,6 +278,27 @@ export default {
             }
             &.get,&.GET {
                 color: #8BC34A;
+            }
+        }
+
+        .el-icon-error {
+            position: absolute;
+            top: 50%;
+            right: 3px;
+            color: #9e9e9e;
+            opacity: 0;
+            background: #fff;
+            transform: translateY(-50%);
+            transition: opacity .3s ease-in-out;
+
+            &:hover {
+                color: #FF5722;
+            }
+        }
+
+        &:hover {
+            .el-icon-error {
+                opacity: 1;
             }
         }
 

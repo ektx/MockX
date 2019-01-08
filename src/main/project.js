@@ -2,6 +2,8 @@ import { ipcMain } from 'electron'
 import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
+import { deletes as delMocks } from './mock.js'
+import { deleteAPI } from './apis.js'
 
 let db = new Datastore({
     filename: path.join(os.homedir(), 'mock-x/db/projects.db'),
@@ -96,7 +98,7 @@ ipcMain.on('REMOVE_PROJECT',(evt, arg) => {
     db.remove(
         {_id: arg._id }, 
         {}, 
-        (err, numRemoved) => {
+        async (err, numRemoved) => {
             if (err) {
                 evt.sender.send('REMOVE_PROJECT_RESULT', {
                     success: false,
@@ -105,9 +107,18 @@ ipcMain.on('REMOVE_PROJECT',(evt, arg) => {
                 return
             }
 
-            // 删除apis
-
-            // 删除 mocks
+            try {
+                // 删除apis
+                await deleteAPI({'baseUrl': arg.baseUrl}, true)
+                // 删除 mocks
+                await delMocks({'projectID': arg.baseUrl}, true)
+            } catch (err) {
+                evt.sender.send('REMOVE_PROJECT_RESULT', {
+                    success: false,
+                    data: err
+                })
+                return
+            }
 
             evt.sender.send('REMOVE_PROJECT_RESULT', {
                 success: true,
