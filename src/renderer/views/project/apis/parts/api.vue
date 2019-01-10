@@ -26,8 +26,8 @@
                 <i class="el-icon-plus" title="添加" @click="toEditMock('response', true, data)"></i>
             </h3>
             <div class="radio-list-box">
-                <ul class="mock-list-box">
-                    <li v-for="item in resList" :key="item._id">
+                <div class="mock-list-box" v-for="item in resList" :key="item._id">
+                    <header>
                         <main>
                             <p>
                                 <el-checkbox :value="item.used" @change="updateResCurrent(item)"></el-checkbox>
@@ -43,8 +43,10 @@
                             <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
                             <i class="el-icon-delete" @click="delThisMock(item)"></i>
                         </aside>
-                    </li>
-                </ul>
+                    </header>
+                    {{item.json}}
+                    <marked :value="getMarkedStr(item.json)"/>
+                </div>
             </div>
         </div>
 
@@ -55,7 +57,8 @@
 
 <script>
 import { mapState } from 'vuex'
-import { ipcRenderer, ipcMain } from 'electron';
+import { ipcRenderer, ipcMain } from 'electron'
+import { object as mock, tomd } from '../../../../../common/mocks/index.js'
 
 export default {
     name: 'project-api-info',
@@ -245,6 +248,14 @@ export default {
                         message: '已取消删除'
                     });          
                 })
+        },
+
+        getMockStr (data) {
+            return typeof data === 'object' ? JSON.stringify(mock(data), '', '\t') : data
+        },
+
+        getMarkedStr (str) {
+            return tomd(str)
         }
     },
     beforeRouteLeave (to, from, next) {
@@ -301,7 +312,7 @@ export default {
 }
 
 .mock-list-box {
-    li {
+    header {
         display: flex;
         flex-direction: row;
         border-bottom: 1px solid #eee;
