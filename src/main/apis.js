@@ -16,56 +16,6 @@ db.ensureIndex({
     unique: true
 })
 
-// 准备废弃
-ipcMain.on('SAVE_API', (evt, arg) => {
-    /*
-    { 
-        // API url
-        url: 'abc' 
-        // 项目URL
-        baseUrl: 'project1543286900089',
-        // 简介
-        description: '',
-        // 请求方式
-        method: 'get',
-        // mock 数据
-        mock: '{\n    a: 1\n}',
-        mockType: ['Js', 'JSON', 'txt']
-            Js 与 json 都会为你mock数据
-            txt 直接返回内容
-        json 生成数据使用
-        // 头部参数与内容
-        headers: [],
-        // 项目ID
-        projectId: 'mZ6YvR6eYBp1yGeM',
-    }
-    */
-
-    // 查寻当前项目是否已经有了此API
-    db.findOne(
-        {projectId: arg.projectId, url: arg.url}, 
-        (err, doc) => {
-            if (err) return
-
-            if (doc) {
-                evt.sender.send('SAVE_API_RESULT', {
-                    success: false,
-                    message: '此 API 已经存在'
-                })
-            } else {
-                db.insert(arg, (err, docs) => {
-                    if (err) return
-            
-                    evt.sender.send('SAVE_API_RESULT', {
-                        success: true,
-                        message: '添加完成'
-                    })
-                })
-            }
-        }
-    )
-})
-
 /**
  * 添加 API 时，默认只要提供
  * @param {string} url 地址
@@ -136,9 +86,10 @@ ipcMain.on('ADD_API', (evt, arg) => {
  * 通过 baseUrl 来查寻所有的 APIs
  */
 ipcMain.on('GET_ALL_APIS', (evt, arg) => {
-    db.find({baseUrl: arg.baseUrl}).sort({updatedAt: -1}).exec((err, docs) => {
+    db.find({baseUrl: arg.baseUrl})
+    .sort({updatedAt: -1}).exec((err, docs) => {
         if (err) return
-
+console.log(docs)
         evt.sender.send('GET_ALL_APIS_RESULT', {
             success: true,
             data: docs
@@ -202,6 +153,23 @@ ipcMain.on('SEARCH_APIS', (evt, arg, arg2) => {
 
 })
 
+// 添加 params 参数
+ipcMain.on('ADD_API_PARAMS', (evt, arg) => {
+    console.log(arg)
+    db.update(
+        {_id: arg.id},
+        {
+            $addToSet: {
+                params: arg.params
+            }
+        },
+        {},
+        (err, doc) => {
+            console.log(err, doc)
+        }
+    )
+})
+
 function deleteAPI (query, multi = false) {
     console.log('Delete API:', query)
     return new Promise((resolve, reject) => {
@@ -256,9 +224,10 @@ function getData (req, res) {
 }
 
 function postData (req, res) {
-    console.log(req.body)
+    console.log(req.params)
 
-    res.send('测试中...')
+    // res.send('测试中...')
+    getData(req, res)
 }
 
 

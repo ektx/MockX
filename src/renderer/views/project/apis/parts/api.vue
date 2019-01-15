@@ -1,5 +1,6 @@
 <template>
     <div class="api-info-box">
+        {{data}}
         <div class="base-info-box">
             <h3>
                 <span>基础信息</span>
@@ -17,7 +18,28 @@
         <div class="params-box">
             <h3>
                 <span>请求参数信息</span>
+                <i class="el-icon-plus" title="添加" @click="addNewParam"></i>
             </h3>
+            <el-table :data="data.params" size="small">
+                <el-table-column 
+                    v-for="item in tableHeader"
+                    :key="item.label"
+                    :label="item.label"
+                >
+                    <template slot-scope="scope">
+                        <el-button
+                            v-if="!item.value"
+                            size="mini"
+                            type="danger">删除</el-button>
+                        <el-input
+                            size='mini'
+                            v-else
+                            v-model="scope.row[item.value]"
+                            :placeholder="item.label"
+                        ></el-input>
+                    </template>
+                </el-table-column>
+            </el-table>
         </div>
 
         <div class="response-box">
@@ -104,6 +126,24 @@ export default {
             resCheckbox: null,
             resCurrent: null,
             resCurrentStatus: 'auto',
+
+            tableHeader: [
+                {
+                    label: 'Key',
+                    value: 'key'
+                },
+                {
+                    label: 'Type',
+                    value: 'type'
+                },
+                {
+                    label: 'Description',
+                    value: 'description'
+                },
+                {
+                    label: 'Set'
+                }
+            ]
         }
     },
     computed: {
@@ -244,6 +284,19 @@ export default {
             return toMD({
                 data: str,
                 preview: true
+            })
+        },
+
+        addNewParam () {
+            console.log(this.data)
+            ipcRenderer.send('ADD_API_PARAMS', {
+                id: this.data._id,
+                baseUrl: this.data.baseUrl,
+                params: {
+                    description: '年1',
+                    key: 'year',
+                    type: 'number'
+                }
             })
         }
     },

@@ -33,7 +33,7 @@ export default function (opt) {
     let art = []
 
     getDocs(doc, opt.data, 1, title)
-    
+
     doc.forEach(item => {
         art.push({
             doc:  getDocBody(item.data, mdHeader),
@@ -82,24 +82,23 @@ function generateDocHeader (data) {
  * @param {string} title 标题说明 
  */
 function getDocs (doc, data, level = 1, title = 'API') {
-    if (Reflect.has(data, 'type')) {
-        let _data = data.data
-        let _doc = {
-            title,
-            level,
-            data: _data,
-        }
+    let _data = data.data
+    let _doc = {
+        title,
+        level,
+        data: _data,
+    }
+    
+    doc.push(_doc)
 
-        doc.push(_doc)
-        
-        for (let key in _data) {
-            if (_data[key].type === 'object') {
-                getDocs(doc, _data[key], level +1, key)
-            } else if (_data[key].type === 'array') {
-                _data[key].data.forEach((item, i) => {
-                    getDocs(doc, item, level+1, `${key}[${i}]`)
-                })
-            }
+    for (let key in _data) {
+        if (_data[key].type === 'object') {
+            getDocs(doc, _data[key], level +1, key)
+        } 
+        else if (_data[key].type === 'array') {
+            _data[key].data.forEach((item, i) => {
+                getDocs(doc, item, level+1, `${key}[${i}]`)
+            })
         }
     }
 }
