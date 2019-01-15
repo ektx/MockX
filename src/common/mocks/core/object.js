@@ -10,25 +10,10 @@ import datetime from './dateTime.js'
 import image from './image.js'
 import phone from './phone.js';
 
-function objFun (json) {
-
-	let result = ''
-
-	if (json.hasOwnProperty('type') && base.typeof(json.type) === 'string') {
-		result = verificationType(json.type, json)
-	} else {
-		result = verificationType(base.typeof(json), json)
-	}
-
-	return result
-}
-
-export default objFun
-
-function verificationType (type, json) {
+function obj (json) {
 	let result = null
 
-	switch (type) {
+	switch (json.type) {
 		case 'array':
 			result = array(json)
 			break;
@@ -36,16 +21,13 @@ function verificationType (type, json) {
 		case 'object':
 			result = {}
 
-			for (let key in json) {
-				if (json.hasOwnProperty(key)) {
-					let _inner = json[key]
-					result[key] = objFun(_inner)
-				}
+			for (let key in json.data) {
+				result[key] = obj(json.data[key])
 			}
 			break;
 
 		case 'string':
-			result = string(json.data ? json.data : json)
+			result = string(json)
 			break;
 
 		case 'number':
@@ -75,3 +57,5 @@ function verificationType (type, json) {
 
 	return result
 }
+
+export default obj

@@ -134,7 +134,6 @@ export default {
 
 .marked-box {
     max-width: 800px;
-    padding: 0 1rem;
     font-size: 14px;
     color: #333;
     position: relative;
@@ -224,7 +223,7 @@ export default {
 
 code, kbd, pre, samp, tt {
     font-family: "Roboto Mono", Monaco, courier, monospace;
-    font-size: 0.8em;
+    font-size: 12px;
     background-color: #f8f8f8;
     -webkit-font-smoothing: initial;
     -moz-osx-font-smoothing: initial;

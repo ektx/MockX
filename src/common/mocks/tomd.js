@@ -1,177 +1,162 @@
-const docs = {}
-const MDheader = [
-    ['name', 'type', 'mark', 'defVal'],
-    ['---', '---', '---', ':---:']
-]
-
-export default function (data, label = '说明') {
-    docs.main = {
-        level: 1,
-        label,
-        data: data
+import object from './core/object.js'
+const myHeader = {
+    label: {
+        label: '参数',
+        align: ''
+    },
+    type: {
+        label: '类型',
+        align: ''
+    },
+    mark: {
+        label: '说明',
+        align: ''
+    },
+    preset: {
+        label: '默认值',
+        align: ''
     }
-
-    let type = getType(data)
-
-    init(type, docs.main)
-
-    return generateMD(docs)
 }
 
 /**
- * 处理
- * @param {string} type 类型
- * @param {object} arg 数据内容
- * @param {object} parent 父级数据
+ * 生成API文档
+ * @param {object} opt 配置
+ * @param {string} title opt中自定义标题，默认为 API
+ * @param {object} header opt中自定义头部规则，默认为 myHeader
+ * @param {object} data opt中的模拟数据
+ * @param {boolean} preview 设置是否需要预览数据
  */
-function init (type, arg, parent) {
-    let data = arg
+export default function (opt) {
+    let mdHeader = opt.header || myHeader
+    let title = opt.title
+    let doc = []
+    let art = []
 
-    if (parent) {
-        // 如果有父级，为父级添加子级
-        if (!Reflect.has(parent, 'children')) {
-            parent.children = []
+    getDocs(doc, opt.data, 1, title)
+    
+    doc.forEach(item => {
+        art.push({
+            doc:  getDocBody(item.data, mdHeader),
+            ...item
+        })
+    })
+    let docHeader = generateDocHeader(mdHeader)
+    let docTxt = generateMardDown(art, docHeader)
+
+    if (opt.preview) {
+        docTxt += `\n~~~json\n${JSON.stringify(object(opt.data), '', '\t')}\n~~~`
+    }
+
+    return docTxt
+}
+
+/**
+ * 生成文档标题
+ * @param {object} data 标题内容
+ */
+function generateDocHeader (data) {
+    let header = ''
+    let align = ''
+
+    for (let key in data) {
+        let item = data[key]
+
+        header += `| ${item.label} `
+
+        switch (item.align) {
+            case 'left': align += `|:--`; break;
+            case 'right': align += `|--:`; break;
+            case 'center': align += `|:--:`; break;
+            default: align += `|---`; break;
         }
+    }
+
+    return `${header} |\r\n${align}|\n`
+}
+
+/**
+ * 生成文档树
+ * @param {array} doc 空文档
+ * @param {object} data 模拟数据
+ * @param {number} level 级数,用于生成标题 
+ * @param {string} title 标题说明 
+ */
+function getDocs (doc, data, level = 1, title = 'API') {
+    if (Reflect.has(data, 'type')) {
+        let _data = data.data
+        let _doc = {
+            title,
+            level,
+            data: _data,
+        }
+
+        doc.push(_doc)
         
-        // 如果是对象
-        if (type === 'object') {
-            // 封装一层
-            data = {
-                level: parent.level +1,
-                ...arg,
+        for (let key in _data) {
+            if (_data[key].type === 'object') {
+                getDocs(doc, _data[key], level +1, key)
+            } else if (_data[key].type === 'array') {
+                _data[key].data.forEach((item, i) => {
+                    getDocs(doc, item, level+1, `${key}[${i}]`)
+                })
             }
         }
     }
-
-    
-    switch (type) {
-        case 'array': arrayFun(data, parent); break;
-        case 'object': objectFun(data, parent); break;
-        default: 
-            arg.doc = [...MDheader]
-            arg.doc.push(
-                ordinaryType({
-                    ...arg.data,
-                    name: arg.label,
-                })
-            )    
-    }
 }
 
-/*
-    {
-        label: '标题',
-        mark: '说明’,
-        level: 1,
-        // data 中是 mock 数组
-        data: [{
-            label: '标签',
-            mark: '说明',
-            defVal: '默认值',
-            min: 1,
-            max: 1,
-            data: [ mock 方法]
-        }]
-    }
-*/
-function arrayFun (arg, parent) {
-    arg.doc = [...MDheader]
+/**
+ * 按标题的格式，生成文档的数组对象
+ * @param {object} data 数据内容
+ * @param {object} header 标题格式
+ */
+function getDocBody (data, header) {
+    let result = []
+    // 对所有的数据进行处理
+    // 生成对应的文档数组
+    for (let key in data) {
+        let tem = {}
 
-    arg.data.forEach((item, index) => {
-        let type = getType(item.data)
-        let name = item.label || `参数 ${index+1}`
-
-        // 处理单个元素
-        arg.doc.push(ordinaryType({
-            ...item,
-            name,
-            type
-        }))
-
-        // 处理复杂型数据
-        if (['array', 'object'].includes(type)) {
-            // 添加 labele
-            item.label = name
-    
-            init(type, item, arg)
+        for (let hKey in header) {
+            switch (hKey) {
+                case 'label':
+                    tem[hKey] = `**${key}**`;
+                    break;
+                case 'type':
+                    tem[hKey] = `\`${data[key].type}\``;
+                    break;
+                default:
+                    tem[hKey] = data[key][hKey] || ''
+            }
         }
-    })
-
-    // 保存处理数据
-    if (parent) parent.children.push(arg)
-}
-
-function objectFun (arg, parent) {
-    arg.doc = [...MDheader]
-
-    for (let key in arg.data) {
-        let type = getType(arg.data[key])
-        
-        arg.doc.push(ordinaryType({
-            ...arg.data[key],
-            type,
-            name: key
-        }))
-
-        // 处理复杂型数据
-        if (['array', 'object'].includes(type)) {
-            init(type, {
-                level: arg.level +1,
-                label: key,
-                data: arg.data[key]
-            }, arg)
-        }
-    }
-    
-    if (parent) parent.children.push(arg)
-}
-
-// 处理通用型数据
-function ordinaryType (arg) {
-    return [
-        `**${arg.name || '-'}**`,
-        `\`${arg.type}\``,
-        `${arg.mark || '-'}`,
-        `${arg.defVal || '-'}`
-    ]
-}
-
-// 获取参数的类型
-function getType (arg) {
-    return typeof arg.type === 'string' 
-    ? arg.type 
-    : Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
-}
-
-function generateMD (arg) {
-    let mdDoc = ''
-
-    for (let key in arg) {
-        let data = arg[key]
-
-        mdDoc += `${'#'.repeat(data.level)} ${data.label}\r\n`
-        mdDoc += docToMD(data.doc) + '\r\n\r\n'
-
-        if (data.children) {
-            mdDoc += generateMD(data.children)
-        }
+        result.push(tem)
     }
 
-    return mdDoc
+    return result
 }
 
-function docToMD (arr) {
-    arr = arr.map(item => {
-        item = item.reduce((a, b) => {
-            return `${a} | ${b}`
+/**
+ * 生成文档
+ * @param {array} docs 文档数组
+ * @param {string} header 统一的文档头
+ */
+function generateMardDown (docs, header) {
+    let result = ''
+
+    // 处理多个文档
+    docs.forEach(item => {
+        let doc = ''
+        let title = `${'#'.repeat(item.level)} ${item.title}` 
+
+        item.doc.map(li => {
+            let str = Object.values(li).reduce((a, b) => {
+                return `${a} | ${b}`
+            })
+
+            doc += `| ${str} |\n`
         })
-
-        return item = `| ${item} |`
+        
+        // 合并文档标题与内容
+        result += `${title}\n${header + doc}\n`
     })
-
-    let md = arr.reduce((a,b) => {
-        return `${a}\r\n${b}`
-    })
-
-    return md
+    return result
 }

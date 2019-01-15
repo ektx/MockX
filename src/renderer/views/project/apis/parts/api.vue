@@ -39,26 +39,21 @@
                             </p>
                         </main>
                         <aside>
-                            <i class="el-icon-view" @click="priviewData(item)"></i>
                             <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
                             <i class="el-icon-delete" @click="delThisMock(item)"></i>
                         </aside>
                     </header>
-                    {{item.json}}
-                    <marked :value="getMarkedStr(item.json)"/>
+                    <marked class="marked-box" :value="getMarkedStr(item.json)"/>
                 </div>
             </div>
         </div>
-
-        <previewMock :show.sync="preview" height="90vh" v-model="previewData"/>
-
     </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import { ipcRenderer, ipcMain } from 'electron'
-import { object as mock, tomd } from '../../../../../common/mocks/index.js'
+import { object as mock, toMD } from '../../../../../common/mocks/index.js'
 
 export default {
     name: 'project-api-info',
@@ -109,10 +104,6 @@ export default {
             resCheckbox: null,
             resCurrent: null,
             resCurrentStatus: 'auto',
-
-            preview: false,
-            previewData: ''
-
         }
     },
     computed: {
@@ -228,11 +219,6 @@ export default {
             this.resCurrent = item
         },
 
-        priviewData (item) {
-            this.preview = true
-            this.previewData = item.json
-        },
-
         delThisMock (item) {
             this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
                     confirmButtonText: '删除',
@@ -255,7 +241,10 @@ export default {
         },
 
         getMarkedStr (str) {
-            return tomd(str)
+            return toMD({
+                data: str,
+                preview: true
+            })
         }
     },
     beforeRouteLeave (to, from, next) {
@@ -278,6 +267,7 @@ export default {
     h3 {
         position: sticky;
         top: 0;
+        z-index: 100;
         padding: 0 0 8px;
         border-bottom: 1px solid #eee;
         background-color: #fff;
@@ -313,9 +303,13 @@ export default {
 
 .mock-list-box {
     header {
+        position: sticky;
+        top: 31px;
+        z-index: 90;
         display: flex;
         flex-direction: row;
         border-bottom: 1px solid #eee;
+        background: #fff;
 
         main {
             flex: 1;
@@ -346,6 +340,28 @@ export default {
             }
         }
 
+    }
+}
+
+.marked-box {
+    margin: 1em 0 2em;
+
+    /deep/ h1 {
+        font-size: 16px;
+    } 
+    /deep/ h2, 
+    /deep/ h3, 
+    /deep/ h4 {
+        font-size: 14px;
+        text-transform: capitalize;
+    }
+
+    /deep/ table {
+        margin: .5em 0;
+
+        td, th {
+            font-size: 13px;
+        }
     }
 }
 

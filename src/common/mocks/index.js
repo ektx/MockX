@@ -1,10 +1,10 @@
 
 import object from './core/object.js'
-import tomd from './tomd.js'
+import toMD from './toMD.js'
 
 export {
 	object,
-	tomd
+	toMD
 }
 
 export default function (json) {
