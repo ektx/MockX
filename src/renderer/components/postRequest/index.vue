@@ -2,25 +2,30 @@
     <div class="post-request">
 
         <div class="url-input">
-            <el-input placeholder="请输入请求地址" v-model="requestParams.url" style="width: 94%">
+            <el-input
+                placeholder="请输入请求地址"
+                v-model="requestParams.url"
+                style="width: 93%">
+
                 <el-select v-model="requestParams.type" slot="prepend" placeholder="请选择">
                     <el-option label="POST" value="POST"></el-option>
                     <el-option label="GET" value="GET"></el-option>
                 </el-select>
                 <el-button slot="append" @click="addParams = !addParams">Params</el-button>
+
             </el-input>
-            <el-button type="primary" @click="send">发送</el-button>
+            <el-button type="primary" @click="send" :loading='loading'>发送</el-button>
         </div>
 
         <div class="add-params" v-if="addParams">
-            <eTable :data='urlParams' @urlParamsChange='urlParamsChange'></eTable>
+            <eTable @change='urlParamsChange' :data='urlParams' ref="urlParams"></eTable>
         </div>
 
         <div class="custom-params">
             <el-tabs v-model="customActiveName">
                 <el-tab-pane label="Headers" name="Headers">
 
-                    <eTable :data='customHeaders'></eTable>
+                    <eTable @change='(data) => customHeaders=data'></eTable>
 
                 </el-tab-pane>
                 <el-tab-pane label="Body" name="Body" :disabled='requestParams.type==="GET"'>
@@ -30,7 +35,7 @@
                         <el-radio label="x-www-form-urlencoded">x-www-form-urlencoded</el-radio>
                     </el-radio-group>
 
-                    <eTable :data='customBodys'></eTable>
+                    <eTable @change='(data) => customBodys=data'></eTable>
 
                 </el-tab-pane>
             </el-tabs>
@@ -75,27 +80,29 @@ import { Loading } from 'element-ui';
 
 export default {
     name: 'PostRequest',
+    props: {
+        name: {
+            type: String,
+            default: '1'
+        },
+        chooseName: {
+            type: String,
+            default: '1'
+        }
+    },
     data () {
         return {
             requestParams:{
-                url:'',
+                url:'http://anhaooray.oicp.net:18888/login/doLogin',
                 type: 'POST',
                 headers: new Object(),
                 data: new Object()
             },
+            urlParams:[{}],
             customActiveName: 'Headers',
-            customHeaders: [{
-                key: 'Content-Type',
-                value: 'application/x-www-form-urlencoded'
-            }],
-            customBodys: [{
-                key: 'userName',
-                value: 'wangruirui'
-            },{
-                key: 'password',
-                value: 'a11111111'
-            }],
-            customBodyType: 'form-data',
+            customHeaders: [],
+            customBodys: [],
+            customBodyType: 'x-www-form-urlencoded',
             responseActiveName: 'Body',
             aceOptions: {
                 mode: 'javascript',
@@ -106,12 +113,7 @@ export default {
             cookiesData:[],
             headers:'',
             loading: false,
-            addParams: false,
-            urlParams: [{
-
-            },{
-
-            },]
+            addParams: false
         }
     },
     watch: {
@@ -120,35 +122,40 @@ export default {
                if ( newVal.type === 'GET')  this.customActiveName = 'Headers'
             },
             deep: true
+        },
+        'requestParams.url'(val){
+            this.$emit('urlChange', val)
+            const data = []
+            if (val.split('?')[1]) {
+                const urlParams= val.split('?')[1].split('&');
+                urlParams.forEach(element => {
+                    data.push({
+                        key:element.split('=')[0],
+                        value:element.split('=')[1]
+                    })
+                });
+                data.push({})
+                this.urlParams = data
+            }
         }
     },
-    mounted() {
-
-        ipcRenderer.on('SEND_REQUEST_RESULT', (evt, res) => {
-            console.log(res)
-
-            this.loading = false
-            this.codeInner = (res.data.chunk).replace(/,/g,',\n    ').replace(/{/g,'{\n    ').replace(/},/g,'\n    },')
-            this.headers = res.data.res.headers
-            this.cookiesData=[{
-                name: 'sid',
-                value: res.data.res.headers['set-cookie'][0].split('sid=')[1].split(';')[0],
-                domain: ''
-            }]
-            
-        })
-
-    },
     methods: {
-        urlParamsChange () {
-
+        urlParamsChange ( dataJson ) {
             let params = ''
-            this.urlParams.forEach( item => {
-                item.key && ( params += '&' + item.key)
-                ( item.key && item.value ) && ( params += '=' + item.value )
+            dataJson && dataJson.forEach( item => {
+                if (item.key) {
+                    params += '&' + item.key
+                    if (item.value) {
+                        params += '=' + item.value
+                    }
+                }
             });
+            if (params.substr(1) === '') {
+                this.requestParams.url = this.requestParams.url.split('?')[0]
+                return false
+            }
             this.requestParams.url = this.requestParams.url.split('?')[0] + '?' + ( params.substr(1) )
-            
+            this.$emit('urlChange', this.requestParams.url)
         },
 
         send() {
@@ -158,16 +165,57 @@ export default {
                 return false
             }
 
-            this.customHeaders.forEach( item => {
-                this.requestParams.headers[item.key] = item.value
-            });
-            this.customBodys.forEach( item => {
-                this.requestParams.data[item.key] = item.value
-            });
-            console.log(this.customHeaders)
-            console.log(this.customBodys)
-            console.log(this.requestParams.data)
+            ipcRenderer.removeAllListeners('SEND_REQUEST_RESULT')
 
+            function isJSON(str) {
+                if (typeof str == 'string') {
+                    try {
+                        JSON.parse(str);
+                        return true;
+                    } catch(e) {
+                        return false;
+                    }
+                }  
+            }
+
+            if (this.name === this.chooseName) {
+                ipcRenderer.on('SEND_REQUEST_RESULT', (evt, res) => {
+
+                    this.loading = false
+                    this.codeInner =  JSON.stringify(JSON.parse(res.data.data), null, 4)
+                    this.headers = res.data.res.headers
+                    if (res.data.res.headers['set-cookie']) {
+                        this.cookiesData=[{
+                            name: res.data.res.headers['set-cookie'][0].split('=')[0],
+                            value: res.data.res.headers['set-cookie'][0].split('=')[1].split(';')[0],
+                            domain: ''
+                        }]
+                    }
+                    
+                })
+            }
+            
+            if (this.customHeaders.length>0) {
+                this.customHeaders.forEach( item => {
+                    if (item.key && item.value) {
+                        this.requestParams.headers[item.key] = item.value
+                    }
+                });
+            } else {
+                this.requestParams.headers = {}
+            }
+            
+            if (this.customBodys.length>0) {
+                this.customBodys.forEach( item => {
+                    if (item.key && item.value) {
+                        this.requestParams.data[item.key] = item.value
+                    }
+                });
+            } else {
+                this.requestParams.data = {}
+            }
+            
+            console.log(this.requestParams)
             this.loading = true
             ipcRenderer.send('SEND_REQUEST', this.requestParams)
 
@@ -181,9 +229,11 @@ export default {
 <style lang='scss' scoped>
 .post-request{
     padding: 1em;
-    padding-bottom: 0;
     height: 100%;
     box-sizing: border-box;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
     .url-input{
         margin-bottom: 15px;
     }
@@ -195,6 +245,9 @@ export default {
         .el-tabs,.el-tab-pane{
             height: 100%;
         }
+    }
+    .el-radio-group{
+        margin-bottom: 15px;
     }
 }
 </style>
