@@ -145,8 +145,8 @@ export default {
     
     h1, h2, h3, h4, h5, h6 {
         margin: 0 0 1.5rem;
-        color: #333;
-        font-weight: 400;
+        color: #999;
+        font-weight: bolder;
 
         &:target {
             color: #E91E63;
@@ -195,11 +195,19 @@ export default {
     }
 
     table {
+        width: 100%;
         margin: 1rem 0;
+        color: #555;
+
+        th {
+            text-align: left;
+            color: #999;
+        }
 
         td, th {
-            padding: .4rem .5rem;
-            border: 1px solid #ddd;
+            font-size: 1.05rem;
+            padding: .4rem 0rem;
+            border-bottom: 1px solid #eee;
         }
     }
 
@@ -230,7 +238,7 @@ code, kbd, pre, samp, tt {
 }
 code {
     color: #28962c;
-    padding: 3px 5px;
+    padding: 2px 7px;
     margin: 0 2px;
     border-radius: 2px;
 }
