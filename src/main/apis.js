@@ -155,11 +155,10 @@ ipcMain.on('SEARCH_APIS', (evt, arg, arg2) => {
 
 // 添加 params 参数
 ipcMain.on('ADD_API_PARAMS', (evt, arg) => {
-    console.log(arg)
     db.update(
         {_id: arg.id},
         {
-            $addToSet: {
+            $set: {
                 params: arg.params
             }
         },

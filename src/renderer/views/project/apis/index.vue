@@ -88,12 +88,6 @@ export default {
                 } else {
                     this.$set(val, 'classes', 'hold')
                 }
-
-                // this.markedInner = ''
-                // this.headerMarked = ''
-
-                // this.formatData()
-                // this.getMarked()
             }
         },
 
@@ -198,7 +192,7 @@ export default {
             -webkit-app-region: drag;
 
             h1 {
-                font-size: 18px;
+                font-size: 22px;
                 font-weight: 400;
                 color: #0a0a0a;
                 overflow: hidden;

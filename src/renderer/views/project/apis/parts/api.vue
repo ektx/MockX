@@ -1,6 +1,5 @@
 <template>
     <div class="api-info-box">
-        {{data}}
         <div class="base-info-box">
             <h3>
                 <span>基础信息</span>
@@ -20,26 +19,7 @@
                 <span>请求参数信息</span>
                 <i class="el-icon-plus" title="添加" @click="addNewParam"></i>
             </h3>
-            <el-table :data="data.params" size="small">
-                <el-table-column 
-                    v-for="item in tableHeader"
-                    :key="item.label"
-                    :label="item.label"
-                >
-                    <template slot-scope="scope">
-                        <el-button
-                            v-if="!item.value"
-                            size="mini"
-                            type="danger">删除</el-button>
-                        <el-input
-                            size='mini'
-                            v-else
-                            v-model="scope.row[item.value]"
-                            :placeholder="item.label"
-                        ></el-input>
-                    </template>
-                </el-table-column>
-            </el-table>
+            <editList :header="tableHeader" v-model="data.params"/>
         </div>
 
         <div class="response-box">
@@ -130,20 +110,33 @@ export default {
             tableHeader: [
                 {
                     label: 'Key',
-                    value: 'key'
+                    key: 'key',
+                    unique: true,
+                    type: 'input'
                 },
                 {
                     label: 'Type',
-                    value: 'type'
+                    key: 'type',
+                    type: 'select',
+                    options: [
+                        {
+                            label: '字符串',
+                            value: 'string'
+                        },
+                        {
+                            label: '数字',
+                            value: 'number'
+                        }
+                    ]
                 },
                 {
                     label: 'Description',
-                    value: 'description'
-                },
-                {
-                    label: 'Set'
+                    key: 'description',
+                    type: 'input'
                 }
-            ]
+            ],
+            // data.parmas 唯一对象
+            paramsUnique: []
         }
     },
     computed: {
@@ -152,6 +145,7 @@ export default {
     watch: {
         data: {
             handler (val) {
+                console.log(val)
                 // 切换api时，重置
                 this.resCurrent = null
 
@@ -165,8 +159,25 @@ export default {
                 ipcRenderer.send('GET_API_MOCKS', {
                     apiID: this.data._id
                 })
+
+                this.updateUnique()
             },
             immediate: true
+        },
+
+        'data.params': {
+            handler (val) {
+                console.log(val, this.data._id)
+                this.updateUnique()
+
+                // 更新
+                ipcRenderer.send('ADD_API_PARAMS', {
+                    id: this.data._id,
+                    baseUrl: this.data.baseUrl,
+                    params: val
+                })
+            },
+            deep: true
         },
 
         resCurrent (val, old) {
@@ -215,6 +226,7 @@ export default {
                 this.$message.error(res.message)
             }
         })
+        
     },
     methods: {
         copyUrl ({value}) {
@@ -254,6 +266,7 @@ export default {
             })
         },
 
+        // 更新当前使用的 mock
         updateResCurrent (item) {
             this.resCurrentStatus = 'update'
             this.resCurrent = item
@@ -276,27 +289,52 @@ export default {
                 })
         },
 
-        getMockStr (data) {
-            return typeof data === 'object' ? JSON.stringify(mock(data), '', '\t') : data
-        },
+        // getMockStr (data) {
+        //     return typeof data === 'object' ? JSON.stringify(mock(data), '', '\t') : data
+        // },
 
+        // marked 文档
         getMarkedStr (str) {
             return toMD({
                 data: str,
                 preview: true
             })
         },
-
+        
+        // 添加一个新的 params
         addNewParam () {
-            console.log(this.data)
-            ipcRenderer.send('ADD_API_PARAMS', {
-                id: this.data._id,
-                baseUrl: this.data.baseUrl,
-                params: {
-                    description: '年1',
-                    key: 'year',
-                    type: 'number'
-                }
+            // 如果有 new 这个字段，不允许添加新的params
+            // new 是预设
+            if (this.paramsUnique.includes('new')) return
+
+            this.paramsUnique.push('new')
+           
+            this.data.params.push({
+                key: 'new',
+                type: 'string',
+                description: ''
+            })
+        },
+
+        // editParams (value, item, key) {
+        //     console.log(value, item, key, item[key])
+        //     if (key === 'key') {
+        //         console.log(this.data.params)
+        //         this.data.params.forEach(it => {
+        //             if (it[key] === value) {
+        //                 console.log('warn')
+        //                 it.classes = 'error'
+        //                 item.classes = 'warn'
+        //             }
+        //         })
+        //     }
+        // },
+        // 更新 data.parmas 中的唯一值
+        updateUnique () {
+            this.paramsUnique = []
+            // 获取 data.params unique
+            this.data.params.forEach(it => {
+                this.paramsUnique.push(it.key)
             })
         }
     },
@@ -322,11 +360,12 @@ export default {
         top: 0;
         z-index: 100;
         padding: 0 0 8px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid #ddd;
         background-color: #fff;
+        user-select: none;
 
         span {
-            font-size: 16px;
+            font-size: 18px;
             color: #333;
             font-weight: 400;
         }
@@ -343,12 +382,19 @@ export default {
     }
 }
 .mockx-ul-list-mod {
-    /deep/ li.url {
-        span {
-            cursor: pointer;
-    
-            &:hover {
-                color: #09f;
+    /deep/ li{
+        &.url {
+            span {
+                cursor: pointer;
+        
+                &:hover {
+                    color: #09f;
+                }
+            }
+        }
+        &.method {
+            span {
+                text-transform: uppercase;
             }
         }
     }
@@ -401,20 +447,19 @@ export default {
 
     /deep/ h1 {
         font-size: 16px;
+        margin: 2rem 0 0rem 0;
     } 
     /deep/ h2, 
     /deep/ h3, 
     /deep/ h4 {
+        margin: 3rem 0 0rem 0;
         font-size: 14px;
         text-transform: capitalize;
     }
 
     /deep/ table {
-        margin: .5em 0;
+        margin: 0.5em 0;
 
-        td, th {
-            font-size: 13px;
-        }
     }
 }
 

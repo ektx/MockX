@@ -129,9 +129,6 @@ export default {
 </script>
 
 <style lang="scss">
-/* markdown css
- */
-
 .marked-box {
     max-width: 800px;
     font-size: 14px;
@@ -147,6 +144,7 @@ export default {
         margin: 0 0 1.5rem;
         color: #999;
         font-weight: bolder;
+        user-select: none;
 
         &:target {
             color: #E91E63;
