@@ -11,6 +11,9 @@
                 </div>
             </header>
             <main>
+                {{myData}}
+                <br/>
+                {{uniqueObj}}
                 <template v-show="myData.length">
                     <div 
                         v-for="(col, ci) in myData" 
@@ -42,7 +45,7 @@
                                 :value="opt.value"/>
                             </el-select>
                         </div>
-                        <i class="el-icon-error" @click="remove(ci)"></i>
+                        <i class="el-icon-error" @click="remove(ci, col)"></i>
                     </div>
                 </template>
                 <div v-show="!myData.length" class="empty">
@@ -68,20 +71,26 @@ export default {
     },
     data () {
         return {
+            // 显示对象
             myData: [],
-            // 警告 无
-            warnStatus: false,
-            // 错误 无
-            errorStatus: false,
-            checkEvt: null,
             // 用于更新父级数据
             update: false,
+            // 验证对象 存储头部唯一键值对
+            uniqueObj: {}
         }
     },
     watch: {
+        // header: {
+        //     handler (val, old) {
+        //         this.getUniqueObj()
+        //     },
+        //     immediate: true
+        // },
         value: {
             handler (val, old) {
-                // 如果是更新中
+                console.log('WATCH value')
+                let errClass = 'error'
+                // 如果是更新，则value的变化是由编辑导致的
                 // 不进行数据处理工作
                 if (this.update) {
                     // 修改状态，返回
@@ -90,59 +99,154 @@ export default {
                 }
 
                 this.myData = []
-                val.forEach(item => {
-                    this.myData.push({
+                this.getUniqueObj()
+
+                // this.uniqueObj = {}
+                val.forEach((item, index) => {
+                    item = {
                         ...item,
-                        classes: ''
-                    })
+                        classes: '',
+                        // 数据唯一ID
+                        _id: index 
+                    }
+
+                    // 1.更新显示对象
+                    this.myData.push(item)
+
+                    // 2.更新验证对象
+                    // 2.1 遍历item所有的内容
+                    for (let key in item) {
+                        // 确认要保持唯一的key
+                        if (key in this.uniqueObj) {
+                            let currentUnique = this.uniqueObj[key][item.key]
+                            // 如果已经存在 当前字段(item.key)
+                            // 我们追加一个
+                            if (item.key in this.uniqueObj[key]) {
+                                // 设置为错误样式
+                                // 因为验证对象中只能有一个元素，不能有相同
+                                item.classes = errClass
+                                // 添加进对象
+                                currentUnique.push(item)
+                                // 设置之前添加的元素也为错误
+                                if (currentUnique[0].classes !== errClass) {
+                                    currentUnique[0].classes = errClass
+                                }
+                            }
+                            // 如果没有 我们添加一个 
+                            else {
+                                this.uniqueObj[key][item.key] = [item]
+                            }
+                        }
+                    }
+
                 })
             },
             immediate: true
         },
         myData: {
             handler (val, old) {
+                console.log('WATCH myData')
                 // 设置为更新中
                 this.update = true
                 this.$emit('input', val)
             },
             deep: true
-        } 
+        }
     },
     methods: {
+        /**
+         * @param {string} val 输入值
+         * @param {object} column 当前对象
+         * @param {object} item 当前header
+         * @param {number} columnIndex 
+         */
         setIntVal (val, column, item, columnIndex) {
-            column[item.key] = val
-            
-            // 防止多次调用
-            clearTimeout(this.checkEvt)
-            this.checkEvt = setTimeout(() => {
-                this.checkInputSiblings(val, column, item, columnIndex)
-            }, 500)
-        },
+            let oldVal = column[item.key]
+            let currentUnique = this.uniqueObj[item.key]
 
-        checkInputSiblings (val, column, item, columnIndex) {
-            this.warnStatus = false
-
-            // 如果当前元素是唯一字段
-            // 我们遍历所有数据，为相同的内容显示警告
-            if (Reflect.has(item, 'unique')) {
-                this.myData.forEach((it, index) => {
-                    // 过滤自己
-                    if (index !== columnIndex) {
-                        if (it[item.key] === val) {
-                            it.classes = 'warn'
-                            this.warnStatus = true
-                        } else {
-                            it.classes = ''
+            // 删除旧内容
+            if (oldVal in currentUnique) {
+                let oldKeySize = currentUnique[oldVal].length
+                if (oldKeySize > 1) {
+                    currentUnique[oldVal].forEach((oldItem, oldIndex) => {
+                        // 如果当前数组中有2个以上
+                        // 那我们只能移除自己的警告
+                        // 因为还有其它的是相同的
+                        if (oldKeySize > 2) {
+                            // 移除警告或错误样式
+                            column.classes = ''
+                        } 
+                        // 
+                        else {
+                            oldItem.classes = ''
                         }
-                    }
+
+                        // 通过_id我们移除当前的对象
+                        if (oldItem._id === column._id) {
+                            currentUnique[oldVal].splice(oldIndex,1)
+                        }
+                    })
+                } else {
+                    this.$delete(currentUnique, oldVal)
+                }
+            }
+            
+            // 添加
+            // 查询在 uniqueObj 是否存在
+            if (val in currentUnique) {
+                currentUnique[val].push(column)
+
+                currentUnique[val].forEach(data => {
+                    data.classes = 'error'
                 })
+            } else {
+                currentUnique[val] = [column]
             }
 
-            column.classes = this.warnStatus && 'warn' 
+            // 设置值
+            column[item.key] = val
         },
 
-        remove (index) {
+        remove (index, column) {
+            console.log('REMOVE EVT')
+            this.update = true
             this.myData.splice(index, 1)
+            // 删除验证对象
+            for (let key in column) {
+                // 确认要保持唯一的key
+                if (key in this.uniqueObj) {
+                    let currentUnique = this.uniqueObj[key][column.key]
+                    // 如果已经存在 当前字段(column.key)
+                    if (column.key in this.uniqueObj[key]) {
+                        let size = this.uniqueObj[key][column.key].length
+                        if (size > 1) {
+                            currentUnique.forEach((d, i) => {
+                                // 处理样式
+                                if (size === 2) {
+                                    d.classes = ''
+                                }
+
+                                // 删除元素
+                                if (d._id === column._id) {
+                                    currentUnique.splice(i, 1)
+                                }
+                            })
+                        } else {
+                            this.$delete(this.uniqueObj[key], column.key)
+                        }
+                    }
+                }
+            }
+        },
+        // 收集键值对
+        getUniqueObj () {
+            this.uniqueObj = {}
+            this.header.forEach(item => {
+                // 如果当前对象是要求为唯一的
+                if (item.unique) {
+                    this.$set(this.uniqueObj, item.key, {})
+                }
+            })
         }
     }
 }
@@ -204,7 +308,7 @@ export default {
                 cursor: pointer;
 
                 &:hover {
-                    color: #F56C6C
+                    color: #F44336
                 }
             }
             
@@ -216,9 +320,9 @@ export default {
                 }
             }
 
-            &.warn {
-                border-bottom: 1px solid #FFC107;
-                background: #ffeb3b14;
+            &.error {
+                border-bottom: 1px solid #F44336;
+                background: #f4433621;
             }
         }
 
