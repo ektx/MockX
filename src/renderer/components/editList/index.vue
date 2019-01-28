@@ -11,9 +11,6 @@
                 </div>
             </header>
             <main>
-                {{myData}}
-                <br/>
-                {{uniqueObj}}
                 <template v-show="myData.length">
                     <div 
                         v-for="(col, ci) in myData" 
@@ -80,12 +77,6 @@ export default {
         }
     },
     watch: {
-        // header: {
-        //     handler (val, old) {
-        //         this.getUniqueObj()
-        //     },
-        //     immediate: true
-        // },
         value: {
             handler (val, old) {
                 console.log('WATCH value')
@@ -101,7 +92,6 @@ export default {
                 this.myData = []
                 this.getUniqueObj()
 
-                // this.uniqueObj = {}
                 val.forEach((item, index) => {
                     item = {
                         ...item,
@@ -148,7 +138,17 @@ export default {
                 console.log('WATCH myData')
                 // 设置为更新中
                 this.update = true
-                this.$emit('input', val)
+                let filter = []
+                // 获取要显示的内容
+                this.header.forEach(item => {
+                    filter.push(item.key)
+                })
+
+                let result = val.map(item => {
+                    // 过滤无用的内容
+                    return JSON.parse(JSON.stringify(item, filter))
+                })
+                this.$emit('input', result)
             },
             deep: true
         }
@@ -161,46 +161,50 @@ export default {
          * @param {number} columnIndex 
          */
         setIntVal (val, column, item, columnIndex) {
-            let oldVal = column[item.key]
-            let currentUnique = this.uniqueObj[item.key]
+            // console.log('SETINTVAL EVT')
+            // 如果需要唯一验证
+            if (Reflect.has(this.uniqueObj, item.key)) {
+                let oldVal = column[item.key]
+                let currentUnique = this.uniqueObj[item.key]
 
-            // 删除旧内容
-            if (oldVal in currentUnique) {
-                let oldKeySize = currentUnique[oldVal].length
-                if (oldKeySize > 1) {
-                    currentUnique[oldVal].forEach((oldItem, oldIndex) => {
-                        // 如果当前数组中有2个以上
-                        // 那我们只能移除自己的警告
-                        // 因为还有其它的是相同的
-                        if (oldKeySize > 2) {
-                            // 移除警告或错误样式
-                            column.classes = ''
-                        } 
-                        // 
-                        else {
-                            oldItem.classes = ''
-                        }
+                // 删除旧内容
+                if (oldVal in currentUnique) {
+                    let oldKeySize = currentUnique[oldVal].length
+                    if (oldKeySize > 1) {
+                        currentUnique[oldVal].forEach((oldItem, oldIndex) => {
+                            // 如果当前数组中有2个以上
+                            // 那我们只能移除自己的警告
+                            // 因为还有其它的是相同的
+                            if (oldKeySize > 2) {
+                                // 移除警告或错误样式
+                                column.classes = ''
+                            } 
+                            // 
+                            else {
+                                oldItem.classes = ''
+                            }
 
-                        // 通过_id我们移除当前的对象
-                        if (oldItem._id === column._id) {
-                            currentUnique[oldVal].splice(oldIndex,1)
-                        }
+                            // 通过_id我们移除当前的对象
+                            if (oldItem._id === column._id) {
+                                currentUnique[oldVal].splice(oldIndex,1)
+                            }
+                        })
+                    } else {
+                        this.$delete(currentUnique, oldVal)
+                    }
+                }
+                
+                // 添加
+                // 查询在 uniqueObj 是否存在
+                if (val in currentUnique) {
+                    currentUnique[val].push(column)
+
+                    currentUnique[val].forEach(data => {
+                        data.classes = 'error'
                     })
                 } else {
-                    this.$delete(currentUnique, oldVal)
+                    currentUnique[val] = [column]
                 }
-            }
-            
-            // 添加
-            // 查询在 uniqueObj 是否存在
-            if (val in currentUnique) {
-                currentUnique[val].push(column)
-
-                currentUnique[val].forEach(data => {
-                    data.classes = 'error'
-                })
-            } else {
-                currentUnique[val] = [column]
             }
 
             // 设置值
@@ -208,7 +212,7 @@ export default {
         },
 
         remove (index, column) {
-            console.log('REMOVE EVT')
+            // console.log('REMOVE EVT')
             this.update = true
             this.myData.splice(index, 1)
             // 删除验证对象

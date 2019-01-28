@@ -61,6 +61,7 @@ ipcMain.on('ADD_API', (evt, arg) => {
     }
 
     params.id = params.baseUrl + params.url
+    params.params = []
 
     db.insert(params, (err, docs) => {
         if (err) {
@@ -223,7 +224,7 @@ function getData (req, res) {
 }
 
 function postData (req, res) {
-    console.log(req.params)
+    console.log(req.params, req.query, req)
 
     // res.send('测试中...')
     getData(req, res)

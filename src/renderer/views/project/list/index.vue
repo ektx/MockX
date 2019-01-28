@@ -10,7 +10,7 @@
             <ul class="project-list">
                 <li v-for="item in data" :key="item._id" @click="goAPIS(item)" @contextmenu.prevent="setMenu(item)">
                     <div class="title">{{item.name}}</div>
-                    <div class="subtitle"><span>{{formatTime(item)}}</span> - {{item.baseUrl}} </div>
+                    <div class="subtitle"><span :title="item.updatedAt">{{formatTime(item)}}</span> - {{item.baseUrl}} </div>
                     <p>{{item.description}}</p>
                 </li>
             </ul>
@@ -162,7 +162,7 @@ export default {
         },
 
         formatTime (item) {
-            return this.$moment(item.updatedAt).fromNow()
+            return this.$moment(item.updatedAt).fromNow().replace(/\s/, '')
         }
     },
     beforeRouteLeave (to, from , next) {
@@ -229,6 +229,7 @@ export default {
         border-bottom: 1px solid rgba(0, 0, 0, .1);
         transition-property: background-color;
         transition-duration: .3s;
+        user-select: none;
 
         &:hover {
             background-color: #f5f5f5;

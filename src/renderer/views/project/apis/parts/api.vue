@@ -37,7 +37,7 @@
                             </p>
                             <p>
                                 <span>类型: {{item.type}}</span>
-                                <span>更新于: {{item.updatedAt}}</span>
+                                <span :title="item.updatedAt">更新于: {{formatTime(item.updatedAt)}}</span>
                             </p>
                         </main>
                         <aside>
@@ -109,13 +109,13 @@ export default {
 
             tableHeader: [
                 {
-                    label: 'Key',
+                    label: '参数',
                     key: 'key',
                     unique: true,
                     type: 'input'
                 },
                 {
-                    label: 'Type',
+                    label: '类型',
                     key: 'type',
                     type: 'select',
                     options: [
@@ -130,7 +130,22 @@ export default {
                     ]
                 },
                 {
-                    label: 'Description',
+                    label: '必填',
+                    key: 'required',
+                    type: 'select',
+                    options: [
+                        {
+                            label: '是',
+                            value: true
+                        },
+                        {
+                            label: '否',
+                            value: false
+                        }
+                    ]
+                },
+                {
+                    label: '描述',
                     key: 'description',
                     type: 'input'
                 }
@@ -331,11 +346,17 @@ export default {
         // },
         // 更新 data.parmas 中的唯一值
         updateUnique () {
-            this.paramsUnique = []
-            // 获取 data.params unique
-            this.data.params.forEach(it => {
-                this.paramsUnique.push(it.key)
-            })
+            if (this.data.params) {
+                this.paramsUnique = []
+                // 获取 data.params unique
+                this.data.params.forEach(it => {
+                    this.paramsUnique.push(it.key)
+                })
+            }
+        },
+
+        formatTime (time) {
+            return this.$moment(time).fromNow().replace(/\s/, '')
         }
     },
     beforeRouteLeave (to, from, next) {
@@ -413,6 +434,10 @@ export default {
         main {
             flex: 1;
             margin: 3px 0;
+
+            .el-checkbox {
+                margin-right: 5px;
+            }
 
             .name {
                 font-size: 14px;
