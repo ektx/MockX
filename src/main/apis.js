@@ -87,10 +87,17 @@ ipcMain.on('ADD_API', (evt, arg) => {
  * 通过 baseUrl 来查寻所有的 APIs
  */
 ipcMain.on('GET_ALL_APIS', (evt, arg) => {
-    db.find({baseUrl: arg.baseUrl})
+    db
+    .find({baseUrl: arg.baseUrl})
     .sort({updatedAt: -1}).exec((err, docs) => {
-        if (err) return
-console.log(docs)
+        if (err) {
+            evt.sender.send('GET_ALL_APIS_RESULT', {
+                success: false,
+                data: docs
+            })
+            return
+        }
+
         evt.sender.send('GET_ALL_APIS_RESULT', {
             success: true,
             data: docs

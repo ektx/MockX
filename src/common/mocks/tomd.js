@@ -1,4 +1,5 @@
 import object from './core/object.js'
+import base from './core/base.js';
 const myHeader = {
     label: {
         label: '参数',
@@ -95,10 +96,30 @@ function getDocs (doc, data, level = 1, title = 'API') {
         if (_data[key].type === 'object') {
             getDocs(doc, _data[key], level +1, key)
         } 
+        // 对于数组，我们只处理数组的对象，其它内容不新建文档
         else if (_data[key].type === 'array') {
-            _data[key].data.forEach((item, i) => {
-                getDocs(doc, item, level+1, `${key}[${i}]`)
-            })
+            if (typeof _data[key].data === 'object') {
+                if (Array.isArray(_data[key].data)) {
+                    let _obj = {}
+                    _data[key].data.forEach((val, i) => {
+                        // 只处理对象
+                        if (base.typeof(val) === 'object') {
+                            _obj[`param${i}`] = val
+                        }
+                    })
+
+                    // 存在有效内容时，显示文本
+                    if (Object.keys(_obj).length)
+                        getDocs(doc, {data: _obj}, level+1, `${key}`)
+                } else {
+                    if (
+                        Reflect.has(_data[key].data, 'type') 
+                        && _data[key].data.type === 'object'
+                    ) {
+                        getDocs(doc, _data[key].data, level+1, `${key}`)
+                    }
+                }
+            }
         }
     }
 }

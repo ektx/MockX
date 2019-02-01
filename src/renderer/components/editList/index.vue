@@ -27,6 +27,7 @@
                                 size="mini"
                                 placeholder="请输入内容"
                                 :value="col[item.key]"
+                                :title="col[item.key]"
                                 @input="setIntVal($event, col, item, ci)"
                             />
                             <el-select 

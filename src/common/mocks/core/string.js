@@ -1,13 +1,7 @@
 /*
-	规则
+	String
 
-	'min-max|lang'
-	
-	@min 最少出现个数，默认为 0
-	@max 最大出现个数，默认等于 min
-	@lang 语言，默认为英文字母,可选[zh-CN]
-
-
+	eg: test/string/index.js
 */
 
 import base from './base.js'
@@ -15,7 +9,11 @@ import base from './base.js'
 export default function string(opt) {
 	let result
 
-	if(Array.isArray(opt.data)) {
+	if (Reflect.has(opt, 'step')) {
+		return step(opt)
+	}
+
+	if (Array.isArray(opt.data)) {
 		result = opt.data[ base.integer(0, opt.data.length-1) ]
 	} else {
 		let min = opt.min || 0
@@ -93,4 +91,20 @@ function englishArticle (length) {
 	let str = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 
 	return `${str.substring(0, length)}...`
+}
+
+/*
+	递增效果
+
+	data: {
+		type: 'string',
+		data: 'No.',
+		step: 1,
+		start: 0 // 默认为 0
+	}
+	
+	=> No.1
+*/
+function step (json) {
+	return json.data+ ((json.start ? json.start : 0) + json.step)
 }
