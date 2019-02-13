@@ -12,6 +12,7 @@
     "source-map-support": "^0.5.9"
   },
   "devDependencies": {
+    "@ektx/mocks": "^0.0.2",
     "ace-builds": "^1.4.2",
     "body-parser": "^1.18.3",
     "codemirror": "^5.42.0",

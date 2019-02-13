@@ -78,9 +78,10 @@ export default {
         color: #333;
         font-size: 14px;
         margin-right: 5px;
+        user-select: none;
     }
     span {
-        color: #606060;
+        color: #999;
         word-break: break-all;
     }
 }

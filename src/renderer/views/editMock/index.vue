@@ -201,6 +201,7 @@ export default {
     height: 100vh;
     flex-direction: column;
     overflow: auto;
+    background-color: #fff;
 
     header {
         display: flex;

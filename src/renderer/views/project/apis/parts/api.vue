@@ -55,7 +55,7 @@
 <script>
 import { mapState } from 'vuex'
 import { ipcRenderer, ipcMain } from 'electron'
-import { object as mock, toMD } from '../../../../../common/mocks/index.js'
+import {object as mock, toMD} from '@ektx/mocks'
 
 export default {
     name: 'project-api-info',

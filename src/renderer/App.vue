@@ -95,13 +95,14 @@ body {
         padding: 20px 0 0;
         width: 70px;
         height: 100vh;
-        background-color: #eee;
         -webkit-app-region: drag;
+        background-color: rgba(255, 255, 255, .7);
     }
 
     main {
         flex: 1;
         overflow: hidden;
+        background-color: rgba(255, 255, 255, .85);
     }
 }
 

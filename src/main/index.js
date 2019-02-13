@@ -16,6 +16,8 @@ function createWindow() {
         minWidth: 500,
         minHeight: 300,
         titleBarStyle: 'hidden',
+        frame: true,
+        vibrancy: 'light'
     })
 
     // 判断开发与生产

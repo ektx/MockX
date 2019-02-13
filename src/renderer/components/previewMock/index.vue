@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import mock from '../../../common/mocks/index.js'
+import mock from '@ektx/mocks'
 
 export default {
     name: 'preview-mock',
