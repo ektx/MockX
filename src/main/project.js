@@ -1,3 +1,13 @@
+/*
+name 项目名称
+baseUrl 项目ID
+description 项目描述
+online 线上项目API地址
+createdAt 创建时间*
+updatedAt 更新时间*
+
+* 数据库自动添加
+*/
 import { ipcMain } from 'electron'
 import Datastore from 'nedb'
 import path from 'path'

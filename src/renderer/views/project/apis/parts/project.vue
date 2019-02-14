@@ -25,8 +25,16 @@ export default {
                     key: 'baseUrl'
                 },
                 {
+                    label: '线上地址',
+                    key: 'online'
+                },
+                {
                     label: '项目说明',
                     key: 'description'
+                },
+                {
+                    label: '创建时间',
+                    key: 'createdAt'
                 }
             ]
         }

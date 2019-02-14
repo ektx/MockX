@@ -1,3 +1,19 @@
+/**
+ * 添加 API 时，默认只要提供
+ * url 地址
+ * method 方法
+ * description 描述
+ * baseUrl 这是自带必填内容，用于表示所属项目
+ * useProxy 使用代理，默认-1，确认了就是proxylist中的索引 
+ * proxyList {array} 代理列表
+ * 
+ * proxyList 参数
+ * {
+ *    url 地址
+ *    type [header|path] 头或是地址
+ *    status {boolean} 是否使用中
+ * }
+ */
 import { ipcMain } from 'electron'
 import Datastore from 'nedb'
 import path from 'path'
