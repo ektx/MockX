@@ -29,7 +29,13 @@ export default {
                 theme: 'ace/theme/dracula',
                 fontSize: 13,
                 printMargin: false,
-                useWorker: true
+                useWorker: true,
+                // 只读
+                // readOnly: false,
+                // 显示行数
+                // showLineNumbers: true,
+                // 显示提示区
+                // showGutter: true
             }
         }
     },
@@ -77,19 +83,14 @@ export default {
 
         // 编辑器失去焦点时
         this.editor.on('blur', () => {
-            console.warn('Blur Ace')
             // 设置状态为空
             this.myStatus = null
         })
         this.editor.on('focus', () => {
-            console.warn('focus Ace')
             // 设置状态为空
             this.myStatus = 'edit'
         })
         
-    },
-    methods: {
-
     }
 }
 </script>
