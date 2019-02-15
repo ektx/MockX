@@ -1,16 +1,28 @@
 <template>
     <section class="project-view">
-        <router-view></router-view>
+        <keep-alive>
+            <router-view />
+        </keep-alive>
     </section>
 </template>
 
 <script>
-import { ipcRenderer } from 'electron'
-import path from 'path'
-
 export default {
     name: 'project-view',
+    data () {
+        return {
+            leavePath: ''
+        }
+    },
     mounted () {
+        this.$router.push({name: 'projectList'})
+    },
+    activated () {
+        this.$router.push({name: this.leavePath})
+    },
+    beforeRouteLeave (to, from, next) {
+        this.leavePath = from.name
+        next()
     }
 }
 </script>

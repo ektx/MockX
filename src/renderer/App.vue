@@ -9,7 +9,7 @@
             </nav>
         </aside>
         <main class="mock-main-display">
-            <keep-alive include='postMan'>
+            <keep-alive :include="keepList">
                 <router-view></router-view>
             </keep-alive>
         </main>
@@ -26,7 +26,7 @@ export default {
             navs: [
                 {
                     label: '项目',
-                    to: '/project/list',
+                    to: '/project',
                     icon: 'icon-app'
                 },
                 {
@@ -46,6 +46,7 @@ export default {
                 },
             ],
             current: null,
+            keepList: ['project-view', 'database-view', 'postMan']
         }
     },
     watch: {

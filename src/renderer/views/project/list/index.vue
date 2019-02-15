@@ -34,7 +34,7 @@ import path from 'path'
 const { Menu, MenuItem } = remote
 
 export default {
-    name: 'project-view',
+    name: 'project-list-view',
     data () {
         return {
             search: '',

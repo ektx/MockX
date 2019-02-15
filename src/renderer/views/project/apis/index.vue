@@ -47,7 +47,7 @@ import APIInfo from './parts/api.vue'
 import AddNewAPI from './parts/addAPI.vue'
 
 export default {
-    name: 'apis-view',
+    name: 'project-apis-view',
     components: {
         APIProjectInfo,
         APIInfo,
@@ -151,6 +151,10 @@ export default {
         }
     },
     beforeRouteLeave (to, from , next) {
+        if (to.name === 'project') {
+            next(false)
+            this.$router.push({name: 'projectList'})
+        }
         ipcRenderer.removeAllListeners('GET_ALL_APIS_RESULT')
         ipcRenderer.removeAllListeners('REMOVE_API_RESULT')
         ipcRenderer.removeAllListeners('SEARCH_APIS_RESULT')
