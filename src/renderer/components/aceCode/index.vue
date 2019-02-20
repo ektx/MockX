@@ -56,7 +56,6 @@ export default {
         },
         value: {
             handler (val) {
-                // console.log(val, this.myStatus, 'ace')
                 // 如果不是编辑状态，可以设置内容
                 if (this.myStatus !== 'edit') {
                     this.$nextTick(() => {
