@@ -39,11 +39,11 @@ export default {
                     to: '/database',
                     icon: 'icon-file'
                 },
-                {
-                    label: 'PostMan',
-                    to: '/postMan',
-                    icon: 'icon-deliver'
-                },
+                // {
+                //     label: 'PostMan',
+                //     to: '/postMan',
+                //     icon: 'icon-deliver'
+                // },
             ],
             current: null,
             keepList: ['project-view', 'database-view', 'postMan']
