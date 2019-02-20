@@ -1,24 +1,31 @@
 /**
  * 添加 API 时，默认只要提供
- * url 地址
- * method 方法
- * description 描述
- * baseUrl 这是自带必填内容，用于表示所属项目
- * useProxy 使用代理，默认-1，确认了就是proxylist中的索引 
- * proxyList {array} 代理列表
+ * @param {string} id 唯一，自动生成，用于保证不重复相同url
+ * @param {string} url 地址
+ * @param {post|get} method 方法
+ * @param {string} description 描述
+ * @param {string} baseUrl 这是自带必填内容，用于表示所属项目
+ * @param {number} useProxy 使用代理，默认-1，确认了就是proxylist中的索引 
+ * @param {array} proxyList 代理列表
+ * @param {date} updatedAt 更新时间
+ * @param {date} createAt 创建时间
+ * @param {array} params 请求参数
  * 
- * proxyList 参数
+ * @param proxyList 参数
  * {
- *    url 地址
- *    type [header|path] 头或是地址
- *    status {boolean} 是否使用中
+ *    @param {string} url 地址
+ *    @param {header|path} type 头或是地址
+ *    @param {boolean} status 是否使用中
  * }
+ * 
+ * # 接口说明
+ * GET_DATABASE_CONTENT 返回数据库操作得到的内容
  */
 import { ipcMain } from 'electron'
 import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
-import mock from '../common/mocks/index.js'
+import mock from '@ektx/mocks'
 import { getMockJSON, deletes as delMocks } from './mock.js'
 
 let db = new Datastore({
@@ -27,6 +34,7 @@ let db = new Datastore({
     timestampData: true
 })
 
+// 设置url为索引并是唯一
 db.ensureIndex({
     fieldName: 'id',
     unique: true
@@ -56,7 +64,7 @@ ipcMain.on('ADD_API', (evt, arg) => {
         message.push('没有 baseUrl')
     }
 
-    if (!result || !arg.url) {
+    if (!result || !arg.url || !arg.url.trim().length) {
         result = false
         message.push('没有 url')
     }
@@ -64,7 +72,7 @@ ipcMain.on('ADD_API', (evt, arg) => {
     if (!result) {
         evt.sender.send('ADD_API_RESULT', {
             success: false,
-            message
+            message: message.join(' ')
         })
         return
     }
@@ -105,7 +113,8 @@ ipcMain.on('ADD_API', (evt, arg) => {
 ipcMain.on('GET_ALL_APIS', (evt, arg) => {
     db
     .find({baseUrl: arg.baseUrl})
-    .sort({updatedAt: -1}).exec((err, docs) => {
+    .sort({updatedAt: -1})
+    .exec((err, docs) => {
         if (err) {
             evt.sender.send('GET_ALL_APIS_RESULT', {
                 success: false,
@@ -165,8 +174,10 @@ ipcMain.on('REMOVE_API', (evt,arg) => {
 
 //响应搜索api操作
 ipcMain.on('SEARCH_APIS', (evt, arg, arg2) => {
-
-    db.find({ baseUrl: arg2, url: { $regex: new RegExp(arg) }}).sort({updatedAt: -1}).exec((err, docs) => {
+    db
+    .find({ baseUrl: arg2, url: { $regex: new RegExp(arg) }})
+    .sort({updatedAt: -1})
+    .exec((err, docs) => {
         if (err) return
 
         evt.sender.send('SEARCH_APIS_RESULT', {
@@ -191,6 +202,30 @@ ipcMain.on('ADD_API_PARAMS', (evt, arg) => {
             console.log(err, doc)
         }
     )
+})
+
+ipcMain.on('API_DB_SET', function (evt, arg) {
+    console.log('API_DB_SET', arg)
+
+    switch (arg.query) {
+        case 'find':
+            db
+            .find( new Function(`return ${arg.params}`)() )
+            .exec((err, docs) => {
+                console.log(docs)
+                if (err) {
+                    evt.sender.send('GET_DATABASE_CONTENT', {
+                        success: false,
+                        data: err
+                    }) 
+                }
+
+                evt.sender.send('GET_DATABASE_CONTENT', {
+                    success: true,
+                    data: docs
+                })
+            })
+    }
 })
 
 function deleteAPI (query, multi = false) {
