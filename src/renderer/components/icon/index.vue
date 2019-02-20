@@ -3,6 +3,10 @@
 </template>
 
 <script>
+/**
+ * Use
+ * <icon class="icon-xxx"/>
+ */
 export default {
     name: 'mock-icon',
     data () {
