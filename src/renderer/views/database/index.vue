@@ -13,7 +13,7 @@
                 >{{item.name}}</p>
             </aside>
             <section class="content-box">
-                <aceCode class="query-box" v-model="aceSetVal"></aceCode>
+                <aceCode class="query-box" v-model="aceSetVal" :options="setOpt"></aceCode>
 
                 <div class="result-box">
                     <div class="result-header">
@@ -32,7 +32,7 @@
 <script>
 import os from 'os'
 import fs from 'fs'
-import { shell } from 'electron'
+import { shell, ipcRenderer } from 'electron'
 
 const dbPath = os.homedir() + '/mock-x/db/'
 
@@ -44,11 +44,13 @@ export default {
             dbList: [],
             currentDB: {},
             aceSetVal: '',
+            setOpt: {
+                mode: 'ace/mode/javascript'
+            },
             dbResult: '',
             resultOpt: {
                 readOnly: true,
-                showLineNumbers: false,
-                showGutter: false
+                mode: 'ace/mode/json'
             }
         }
     },
@@ -74,6 +76,18 @@ export default {
 
         this.currentDB = this.dbList[0]
     },
+    activated () {
+        ipcRenderer.on('GET_DATABASE_CONTENT', (evt, res) => {
+            if (res.success) {
+                this.dbResult = JSON.stringify(res.data, '', '\t')
+            } else {
+                alert(res.data)
+            }
+        })
+    },
+    deactivated () {
+        ipcRenderer.removeAllListeners('GET_DATABASE_CONTENT')
+    },
     methods: {
         open () {
             shell.showItemInFolder(this.path)
@@ -81,6 +95,33 @@ export default {
 
         run () {
             console.log(this.aceSetVal)
+            if (this.aceSetVal.startsWith('db.')) {
+                this.dbQuery()
+            }
+        },
+        
+        /**
+         * 查寻功能
+         * 目前支持 apis 数据库的查寻功能
+         * 
+         * todo
+         * apis 增、删、改
+         * mocks 增、删、改、查
+         * projects 增、删、改、查
+         */
+        dbQuery () {
+            let query = this.aceSetVal.match(/(?<=\.)(\w+)\(/)[1]
+            let params = this.aceSetVal.match(/\({?.+}?\)/)[0].slice(1, -1)
+
+            console.log(query, params)
+            switch (this.currentDB.name) {
+                case 'apis':
+                    ipcRenderer.send('API_DB_SET', {
+                        query,
+                        params
+                    })
+                    break;
+            }
         }
     }
 }
@@ -123,10 +164,10 @@ export default {
             background: #fff;
 
             .query-box {
-                height: 20vh;
+                height: 20%;
             }
             .result-box {
-                height: 80vh;
+                height: 80%;
             }
         }
     }
@@ -162,6 +203,7 @@ export default {
 }
 
 .db-list-box {
+    height: 20px;
     padding: 0 5px;
     color: #333;
     font-size: 14px;
@@ -178,7 +220,10 @@ export default {
     font-size: 10px;
     line-height: 2em;
     color: #333;
-    text-transform: uppercase;
+    // text-transform: uppercase;
     user-select: none;
+}
+.result-code-box {
+    height: calc(100% - 20px);
 }
 </style>
