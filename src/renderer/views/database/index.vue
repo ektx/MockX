@@ -203,7 +203,6 @@ export default {
 }
 
 .db-list-box {
-    height: 20px;
     padding: 0 5px;
     color: #333;
     font-size: 14px;
@@ -220,7 +219,6 @@ export default {
     font-size: 10px;
     line-height: 2em;
     color: #333;
-    // text-transform: uppercase;
     user-select: none;
 }
 .result-code-box {
