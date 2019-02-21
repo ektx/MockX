@@ -2,15 +2,20 @@
     <section class="apis-view">
         <aside>
             <header>
-                <el-input 
-                    class="search-box" 
-                    placeholder="Search: API" 
-                    v-model="search" 
-                    clearable 
-                    size="mini"
-                >
-                    <el-button slot="append" icon="el-icon-plus" @click="addNewAPI = true"></el-button>
-                </el-input>
+                <div class="apis-aside-set-header">
+                    <icon class="icon-menu" @click="goToList" />
+                    <span></span>
+                    <!-- <i class="el-icon-search"></i> -->
+                    <i class="el-icon-plus" @click="addNewAPI = true"></i>
+                </div>
+                <div class="search-box">
+                    <el-input 
+                        placeholder="Search: API" 
+                        v-model="search" 
+                        clearable 
+                        size="mini"
+                    />
+                </div>
             </header>
             <ul class="apis-list">
                 <li 
@@ -56,7 +61,7 @@ export default {
     data () {
         return {
             // 当前项目
-            project: JSON.parse(localStorage.project),
+            project: {},
             title: '',
             search: '',
             list: [],
@@ -96,34 +101,44 @@ export default {
         }
 
     },
-    mounted () {
-        this.getAPIs()
-
-        this.title = this.project.name
-
-        ipcRenderer.on('GET_ALL_APIS_RESULT', (evt, res) => {
-            if (res.success) {
-                this.list = res.data
-            } else {
-                this.$message.error(res.message)
-            }
-        })
-
-        ipcRenderer.on('REMOVE_API_RESULT', (evt, res) => {
-            if (res.success) {
-                this.getAPIs()
-                this.$message.success('删除成功！')
-            } 
-        })
-
-        ipcRenderer.on('SEARCH_APIS_RESULT', (evt, res) => {
-            if (res.success) {
-                this.list = res.data
-            }
-        })
-
+    activated () {
+        console.log(2)
+        this.init()
+    },
+    deactivated () {
+        ipcRenderer.removeAllListeners('GET_ALL_APIS_RESULT')
+        ipcRenderer.removeAllListeners('REMOVE_API_RESULT')
+        ipcRenderer.removeAllListeners('SEARCH_APIS_RESULT')
     },
     methods: {
+        init () {
+            this.project = JSON.parse(localStorage.project)
+            this.title = this.project.name
+
+            this.getAPIs()
+
+            ipcRenderer.on('GET_ALL_APIS_RESULT', (evt, res) => {
+                if (res.success) {
+                    this.list = res.data
+                } else {
+                    this.$message.error(res.message)
+                }
+            })
+
+            ipcRenderer.on('REMOVE_API_RESULT', (evt, res) => {
+                if (res.success) {
+                    this.getAPIs()
+                    this.$message.success('删除成功！')
+                } 
+            })
+
+            ipcRenderer.on('SEARCH_APIS_RESULT', (evt, res) => {
+                if (res.success) {
+                    this.list = res.data
+                }
+            })
+        },
+
         getAPIs () {
             ipcRenderer.send('GET_ALL_APIS', {
                 baseUrl: this.project.baseUrl
@@ -148,14 +163,11 @@ export default {
             } else {
                 this.current = api
             }
-        }
-    },
-    beforeRouteLeave (to, from , next) {
-        ipcRenderer.removeAllListeners('GET_ALL_APIS_RESULT')
-        ipcRenderer.removeAllListeners('REMOVE_API_RESULT')
-        ipcRenderer.removeAllListeners('SEARCH_APIS_RESULT')
+        },
 
-        next()
+        goToList () {
+            this.$router.push({name: 'projectList'})
+        }
     }
 }
 </script>
@@ -171,10 +183,33 @@ export default {
         flex-direction: column;
         width: 230px;
         height: 100%;
-        border-right: 1px solid #eee;
+        background-color: #f5f5f5;
 
         header {
-            margin: 10px 5px;
+            .apis-aside-set-header {
+                display: flex;
+                padding: 10px 5px 5px 5px;
+                -webkit-app-region: drag;
+
+                span {
+                    flex: 1;
+                }
+
+                i {
+                    padding: 4px;
+                    color: #333;
+                    font-size: 16px;
+                    border-radius: 100%;
+                    cursor: pointer;
+
+                    &:hover {
+                        color: #09f;
+                    }
+
+                }
+            }
+
+            
         }
     }
 
@@ -184,6 +219,7 @@ export default {
         flex-direction: column;
         color: #333;
         overflow: auto;
+        background-color: #fff;
 
         header {
             width: 100%;
@@ -238,8 +274,8 @@ export default {
 
 .apis-list {
     flex: 1;
+    margin: 5px 0 0;
     overflow: auto;
-    border-top: 1px solid #eee;
 
     li {
         position: relative;
@@ -306,10 +342,25 @@ export default {
         }
 
         &.hold {
-            background: #f1f1f1;
+            background: #e4e4e4;
             transition: background .3s ease-in-out;
+
+            &::after {
+                border-color: transparent;
+            }
         }
     }
+}
+
+</style>
+<style>
+.search-box {
+    margin: 0 10px 0;
+}
+    
+.apis-view .search-box .el-input__inner {
+    background-color: #e4e4e4;
+    border: none;
 }
 </style>
 

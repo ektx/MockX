@@ -129,10 +129,9 @@ export default {
         },
 
         goAPIS (item) {
-            this.$router.push({name: 'projectApis'})
-
             // 保存当前项目
             localStorage.project = JSON.stringify(item)
+            this.$router.push({name: 'projectApis'})
         },
 
         setMenu (item) {
@@ -181,6 +180,7 @@ export default {
     display: flex;
     height: 100vh;
     flex-direction: column;
+    background-color: #fff;
 
     .drag-bar {
         height: 20px;

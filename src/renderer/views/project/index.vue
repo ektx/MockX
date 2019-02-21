@@ -50,6 +50,5 @@ export default {
 .project-view {
     width: 100%;
     overflow: hidden;
-    background-color: #fff;
 }
 </style>
