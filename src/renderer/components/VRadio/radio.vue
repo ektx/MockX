@@ -7,7 +7,7 @@
 			:name="innerName" 
 			:value="val"
 			:checked="checkedStatus"
-			:disabled="disabled"
+			:disabled="iDisabled"
 			@change="change"
 		>
 		<div class="v-radio-slot">
@@ -46,7 +46,8 @@ export default {
 			// 默认使用用户输入的 name
 			// 在有组的情况下,使用组的
 			innerName: this.name,
-			type: ''
+			type: '',
+			iDisabled: this.disabled
 		}
 	},
 	mounted () {
@@ -56,7 +57,6 @@ export default {
 	},
 	methods: {
 		change (evt) {
-			console.log('radio')
 			this.checkedStatus = evt.target.checked
 			
 			if (this.$parent.$options.name === 'VRadioGroup') {
@@ -114,13 +114,18 @@ label.v-radio-label {
 			background-color: $activeColor;
 			transform: translate3D(-50%,-50%,0) scale(1);
 		}
-		
+
 		&[disabled] {
 			border-color: #bbb;
 			cursor: default;
 
 			&:checked::after {
 				background-color: #bbb;
+			}
+
+			& + .v-radio-slot {
+				filter: grayscale(100%) opacity(.5);
+				pointer-events: none;
 			}
 		}
 	}

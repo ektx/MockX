@@ -19,6 +19,10 @@ export default {
 		type: {
 			type: String,
 			default: '' // button-mod vertical-button-mod
+		},
+		disabled: {
+			type: Boolean,
+			default: false
 		}
 	},
 	data () {
@@ -45,6 +49,15 @@ export default {
 					}
 				})
 			}
+		},
+		disabled (val) {
+			if (this.$children) {
+				this.$children.forEach(child => {
+					if (child.$options.name === 'v-radio') {
+						child.iDisabled = child.disabled || val
+					}
+				})
+			}
 		}
 	},
 	methods: {
@@ -61,6 +74,7 @@ export default {
 						child.innerName = groupName
 						child.checkedStatus = child.val === this.value
 						child.type = this.type
+						child.iDisabled = this.disabled
 					}
 				})
 			}
