@@ -9,9 +9,6 @@
 export default {
 	name: 'VRadioGroup',
 	props: {
-		name: {
-			type: String
-		},
 		value: {
 			type: [String, Number, Boolean],
 			default: ''
@@ -29,57 +26,19 @@ export default {
 		return {
 			styles: {
 				gridTemplateColumns: `auto`,
-				gridTemplateRows: 'auto',
-				gridAutoFlow: 'columns'
+				gridTemplateRows: 'auto'
 			}
 		}
 	},
-	mounted () {
-		this.update()
-	},
 	watch: {
-		value () {
-			this.update() 
-		},
 		type (val) {
-			if (this.$children) {
-				this.$children.forEach(child => {
-					if (child.$options.name === 'v-radio') {
-						child.type = val
-					}
-				})
-			}
-		},
-		disabled (val) {
-			if (this.$children) {
-				this.$children.forEach(child => {
-					if (child.$options.name === 'v-radio') {
-						child.iDisabled = child.disabled || val
-					}
-				})
-			}
+			this.getStyle()
 		}
 	},
 	methods: {
 		change (data) {
 			this.$emit('input', data)
 			this.$emit('change', data)
-		},
-
-		update () {
-			let groupName = Date.now()
-			if (this.$children) {
-				this.$children.forEach(child => {
-					if (child.$options.name === 'v-radio') {
-						child.innerName = groupName
-						child.checkedStatus = child.val === this.value
-						child.type = this.type
-						child.iDisabled = this.disabled
-					}
-				})
-			}
-
-			this.getStyle()
 		},
 
 		getStyle () {
@@ -89,7 +48,9 @@ export default {
 
 				if (this.type.startsWith('vertical-')) {
 					this.styles.gridTemplateRows = `repeat(${size}, ${BCR.height/size}px)`
+					this.styles.gridTemplateColumns = 'auto'
 				} else {
+					this.styles.gridTemplateRows = 'auto'
 					this.styles.gridTemplateColumns = `repeat(${size}, ${BCR.width/size}px)`
 				}
 			}

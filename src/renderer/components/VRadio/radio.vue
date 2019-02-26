@@ -4,11 +4,9 @@
 		<input 
 			type="radio"
 			class="v-radio-int" 
-			:name="innerName" 
-			:value="val"
-			:checked="checkedStatus"
-			:disabled="iDisabled"
-			@change="change"
+			:value="val" 
+			v-model="inner"
+			:disabled="isDisabled"
 		>
 		<div class="v-radio-slot">
 			<slot></slot>
@@ -20,52 +18,51 @@
 export default {
 	name: 'v-radio',
 	props: {
+		// 动态值
 		value: {
 			type: [String, Number, Boolean],
 			default: ''
 		},
+		// 固定值
 		val: {
 			type: [String, Number, Boolean],
 			default: ''
-		},
-		name: {
-			type: String
-		},
-		checked: {
-			type: Boolean,
-			default: false
 		},
 		disabled: {
 			type: Boolean,
 			default: false
 		}
 	},
-	data () {
-		return {
-			checkedStatus: this.checked,
-			// 默认使用用户输入的 name
-			// 在有组的情况下,使用组的
-			innerName: this.name,
-			type: '',
-			iDisabled: this.disabled
-		}
-	},
-	mounted () {
-		if (this.value && this.value === this.val) {
-			this.checkedStatus = true
-		}
-	},
-	methods: {
-		change (evt) {
-			this.checkedStatus = evt.target.checked
-			
+	computed: {
+		isGroup () {
 			if (this.$parent.$options.name === 'VRadioGroup') {
-				this.$parent.change(this.val)
+				this.group = this.$parent
+				return true
 			} else {
-				this.$emit('input', this.val)
-				this.$emit('change', this.val)
+				return false
 			}
-			
+		},
+
+		inner: {
+			get () {
+				return this.isGroup ? this.group.value : this.value
+			},
+			set (val) {
+				if (this.isGroup) {
+					this.$parent.change(val)
+				} else {
+					this.$emit('input', val)
+				}
+				this.$emit('change', val)
+			}
+		},
+
+		isDisabled () {
+			return this.isGroup ? this.group.disabled : this.disabled
+		},
+
+		type () {
+			return this.isGroup && this.group.type
 		}
 	}
 }
@@ -176,6 +173,7 @@ label.v-radio-label {
 			background: $activeColor;
 			border-color: $activeColor;
 			box-shadow: -1px 0 0 0 $activeColor;
+			transition: background-color .3s ease-in-out;
 		}
 	}
 
