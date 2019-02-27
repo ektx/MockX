@@ -17,13 +17,14 @@ export default {
   },
   data () {
     return {
-      value: '',
+      value: '1',
       // 默认 all 选中
-      groupVal: 'All'
+      groupVal: '2',
+      disabled: false
     }
   },
   methods: {
-    helloTest (data) {
+    changeEvt (data) {
       console.log(data)
     }
   }
@@ -36,23 +37,21 @@ export default {
 ```html
 <!-- disabled 取值示例 -->
 <VRadio disabled>标签方式</VRadio>
-<VRadio :disabled="true">动态布尔值</VRadio>
-<VRadio :disabled="true" checked>固定值</VRadio>
-
-<!-- checked 取值示例 -->
-<VRadio name="checkedStr" >标签方式</VRadio>
-<VRadio name="checkedStr" checked>标签方式</VRadio>
-<VRadio name="checkedBoolean" :checked="true">动态布尔值</VRadio>
-<VRadio name="checkedBoolean" :checked="false">动态布尔值</VRadio>
+<VRadio :disabled="disabled">动态布尔值</VRadio>
 
 <!-- change事件 -->
-<VRadio name="evt" val="change事件" v-on:change="helloTest">change事件</VRadio>
-<!-- 原生事件调用 -->
-<VRadio name="evt" val="原生事件调用" v-on:click.native="helloTest('hello')">原生事件调用</VRadio>
-<!-- v-model 方法 -->
-<VRadio name="cc" val="All" v-model="value" @change="helloTest">全部</VRadio>
+<VRadio @change="changeEvt">change事件</VRadio>
 
+<!-- v-model 方法 -->
+<VRadio val="1" v-model="value" @change="changeEvt">全部</VRadio>
 ```
+
+#### VRadio Props 参数
+| 参数 | 类型 | 说明 | 默认值 |
+|:---:| --- | --- |:---:|
+| v-model | `String Number Boolean` | 绑定内容 | - |
+| val | `String Number Boolean` | 默认内容 | - |
+| disabled | `Boolean` | 控制按钮是否可以使用 | `false` |
 
 ### VRadioGroup 使用
 
@@ -60,11 +59,22 @@ export default {
 <VRadioGroup 
   class="your-class" 
   v-model="groupVal" 
-  @change="helloTest"
+  @change="changeEvt"
 >
-  <VRadio val="All">全部</VRadio>
-  <VRadio val="Done">已完成</VRadio>
-  <VRadio val="will">进行中</VRadio>
+  <VRadio val="0">全部</VRadio>
+  <VRadio val="1">已完成</VRadio>
+  <VRadio val="2">进行中</VRadio>
 </VRadioGroup>
 ```
 
+#### VRadio Props 参数
+| 参数 | 类型 | 说明 | 默认值 |
+|:---:| --- | --- |:---:|
+| v-model | `String Number Boolean` | 绑定内容 | - |
+| type | `button-mod(水平按钮)` <br/> `vertical-button-mod(垂直按钮)` | 组的样式 | - |
+| disabled | `Boolean` | 控制按钮是否可以使用 | `false` |
+
+## Event 事件
+
+### @change
+变化事件，返回变化后的值。
