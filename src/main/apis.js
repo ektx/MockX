@@ -31,6 +31,10 @@ import { ipcMain } from 'electron'
 import Datastore from 'nedb'
 import path from 'path'
 import os from 'os'
+import http from 'http'
+import https from 'https'
+import querystring from 'querystring'
+import url from 'url'
 import mock from '@ektx/mocks'
 import { getMockJSON, deletes as delMocks } from './mock.js'
 
@@ -355,6 +359,58 @@ function getData (req, res) {
         }
         // 查寻到了 api 基础信息后
         if (doc) {
+
+            if (
+                Reflect.has(doc, 'usedProxy') 
+                && doc.usedProxy.open
+            ) {
+                let _url = doc.proxyList[doc.usedProxy.index].url
+                let _urlObj = url.parse(_url)
+                let _postData = ''
+                let _path = _urlObj.path
+
+                // 针对 req.query
+                if (Object.keys(req.query).length) {
+                    _path += `?${querystring.stringify(req.query)}`
+                }
+
+                // 针对 req.body
+                if (Object.keys(req.body)) {
+                    _postData = querystring.stringify(req.body)
+                }
+
+                let _options = {
+                    hostname: _urlObj.hostname,
+                    port: 443,
+                    path: _path,
+                    method: req.method,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                        'Content-Length': Buffer.byteLength(_postData)
+                    }
+                }
+
+                // proxy ask
+                let _request
+                if (_urlObj.protocol === 'https:') {
+                    _request = https.request(_options, (hres) => {
+                        hres.setEncoding('utf8')
+                        // 处理返回格式
+                        res.setHeader('Content-Type', hres.headers['content-type'])
+
+                        hres.pipe(res)
+                    })
+                } else {
+                    _request = http.request(_options, (hres) => {
+                        hres.pipe(res)
+                    })
+                }
+                
+                _request.write(_postData)
+                _request.end()
+                return
+            }
+
             // 我们通过 api 的 _id 去 mocks数据库中取唯一一个
             // 使用中的 mock 
             // {apiID: doc._id, used: true}
@@ -366,14 +422,13 @@ function getData (req, res) {
                 data = '没有发现使用中的数据'
             }
 
+            res.send(data)
         } 
-
-        res.send(data)
     })
 }
 
 function postData (req, res) {
-    console.log(req.params, req.query, req)
+    // console.log(req.params, req.query, req)
 
     // res.send('测试中...')
     getData(req, res)
