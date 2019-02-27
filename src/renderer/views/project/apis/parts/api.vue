@@ -56,11 +56,7 @@
             </h3>        
         </div>
 
-        <div class="headers-box">
-            <h3>
-                <span>代理</span>
-            </h3>        
-        </div>
+        <ProxyMod :project="project" :api="data"/>
     </div>
 </template>
 
@@ -68,13 +64,21 @@
 import { mapState } from 'vuex'
 import { ipcRenderer, ipcMain } from 'electron'
 import {object as mock, toMD} from '@ektx/mocks'
+import ProxyMod from './proxyMod.vue'
 
 export default {
     name: 'project-api-info',
+    components: {
+        ProxyMod
+    },
     props: {
         data: {
             type: Object,
             default: null
+        },
+        project: {
+            type: Object,
+            default: () => {}
         }
     },
     data () {
@@ -187,6 +191,14 @@ export default {
                     apiID: this.data._id
                 })
 
+                // 设置默认的使用代理
+                if (!('usedProxy' in val)) {
+                    this.$set(val, 'usedProxy', {
+                        open: true,
+                        index: 0
+                    })
+                }
+
                 this.updateUnique()
             },
             immediate: true
@@ -271,7 +283,6 @@ export default {
         editApi () {
             this.$parent.addNewAPI = true
             this.$parent.apiData = this.data
-            console.log(this.data, this.$parent.apiData)
         },
 
         toEditMock (type, isAdd, data) {
@@ -316,10 +327,6 @@ export default {
                 })
         },
 
-        // getMockStr (data) {
-        //     return typeof data === 'object' ? JSON.stringify(mock(data), '', '\t') : data
-        // },
-
         // marked 文档
         getMarkedStr (str) {
             return toMD({
@@ -343,19 +350,6 @@ export default {
             })
         },
 
-        // editParams (value, item, key) {
-        //     console.log(value, item, key, item[key])
-        //     if (key === 'key') {
-        //         console.log(this.data.params)
-        //         this.data.params.forEach(it => {
-        //             if (it[key] === value) {
-        //                 console.log('warn')
-        //                 it.classes = 'error'
-        //                 item.classes = 'warn'
-        //             }
-        //         })
-        //     }
-        // },
         // 更新 data.parmas 中的唯一值
         updateUnique () {
             if (this.data.params) {
@@ -388,7 +382,7 @@ export default {
         margin-bottom: 2em;
     }
     
-    h3 {
+    /deep/ h3 {
         position: sticky;
         top: 0;
         z-index: 100;
@@ -497,6 +491,39 @@ export default {
     /deep/ table {
         margin: 0.5em 0;
 
+    }
+}
+
+.proxy-list-box {
+    li {
+        margin: 5px 0;
+        padding: 5px;
+        color: #777;
+        font-size: 12px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        cursor: pointer;
+
+        p {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        p:first-child {
+            font-size: 16px;
+            color: #333;
+        }
+
+        &.used {
+            color: rgba(255, 255, 255, .6);
+            background-color: #09f;
+            border-color: transparent;
+
+            p:first-child {
+                color: #fff;
+            }
+        }
     }
 }
 

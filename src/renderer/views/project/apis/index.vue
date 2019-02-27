@@ -36,7 +36,7 @@
             </header>
             <div class="content-box">
                 <APIProjectInfo v-if="!current" :data="project"/>
-                <APIInfo v-else :data="current"/>
+                <APIInfo v-else :data="current" :project="project"/>
             </div>
         </main>
 
@@ -66,11 +66,6 @@ export default {
             search: '',
             list: [],
             current: null,
-            // code: '',
-            // 接口返回内容markdown文档化内容
-            // markedInner: '',
-            // 请求头信息 markdown 文档化内容
-            // headerMarked: '',
             addNewAPI: false,
             // 添加api的默认内容
             apiData: null

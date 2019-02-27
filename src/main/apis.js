@@ -5,7 +5,7 @@
  * @param {post|get} method 方法
  * @param {string} description 描述
  * @param {string} baseUrl 这是自带必填内容，用于表示所属项目
- * @param {number} useProxy 使用代理，默认-1，确认了就是proxylist中的索引 
+ * @param {number} usedProxy 使用代理
  * @param {array} proxyList 代理列表
  * @param {date} updatedAt 更新时间
  * @param {date} createAt 创建时间
@@ -13,9 +13,15 @@
  * 
  * @param proxyList 参数
  * {
+ *    @param {string} title 标题
  *    @param {string} url 地址
- *    @param {header|path} type 头或是地址
  *    @param {boolean} status 是否使用中
+ * }
+ * 
+ * @param usedProxy 
+ * {
+ *  @param {boolean} open 开关
+ *  @param {number} index 使用的代理
  * }
  * 
  * # 接口说明
@@ -205,7 +211,7 @@ ipcMain.on('ADD_API_PARAMS', (evt, arg) => {
 })
 
 ipcMain.on('API_DB_SET', function (evt, arg) {
-    console.log('API_DB_SET', arg)
+    // console.log('API_DB_SET', arg)
 
     switch (arg.query) {
         case 'find':
@@ -228,8 +234,93 @@ ipcMain.on('API_DB_SET', function (evt, arg) {
     }
 })
 
+ipcMain.on('API_ADD_NEW_PROXY', function (evt, arg) {
+    db.update(
+        {_id: arg._id},
+        {
+            $addToSet: {
+                proxyList: {
+                    title: arg.title,
+                    url: arg.url,
+                    used: false
+                }
+            }
+        },
+        {},
+        (err, nums) => {
+            if (err) {
+                evt.sender.send('API_ADD_NEW_PROXY_RESULT', {
+                    success: false,
+                    data: err
+                })
+                return
+            }
+
+            evt.sender.send('API_ADD_NEW_PROXY_RESULT', {
+                success: true,
+                data: nums
+            })
+        }
+    )
+})
+
+ipcMain.on('REMOVE_API_PROXY', function (evt, arg) {
+
+    db.update(
+        {_id: arg._id},
+        {
+            $pull: {
+                proxyList: {
+                    url: arg.url,
+                    title: arg.title
+                }
+            }
+        },
+        {},
+        (err, nums) => {
+            if (err) {
+                evt.sender.send('REMOVE_API_PROXY_RESULT', {
+                    success: false,
+                    data: err
+                })
+                return
+            }
+
+            evt.sender.send('REMOVE_API_PROXY_RESULT', {
+                success: true,
+                data: nums
+            })
+        }
+    )
+})
+
+ipcMain.on('SET_API_USEDPROXY', function (evt, {_id, ...usedProxy}) {
+    db.update(
+        { _id },
+        {
+            $set: { usedProxy }
+        },
+        {},
+        (err, nums) => {
+            if (err) {
+                evt.sender.send('SET_API_USEDPROXY_RESULT', {
+                    success: false,
+                    data: err
+                })
+                return
+            }
+
+            evt.sender.send('SET_API_USEDPROXY_RESULT', {
+                success: true,
+                data: nums
+            })
+        }
+
+    )
+})
+
 function deleteAPI (query, multi = false) {
-    console.log('Delete API:', query)
+    // console.log('Delete API:', query)
     return new Promise((resolve, reject) => {
         db.remove(query, {multi}, (err, num) => {
             if (err) {

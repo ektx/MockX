@@ -22,7 +22,7 @@
 import { ipcRenderer } from 'electron'
 
 export default {
-    name: 'addAPI',
+    name: 'addAPI-dialog',
     props: {
         // 控制显示与隐藏
         value: {
