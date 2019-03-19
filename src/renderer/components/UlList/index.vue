@@ -75,13 +75,13 @@ export default {
 
     label {
         display: block;
-        color: #333;
+        color: #999;
         font-size: 14px;
         margin-right: 5px;
         user-select: none;
     }
     span {
-        color: #999;
+        color: #333;
         word-break: break-all;
     }
 }
