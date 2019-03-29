@@ -150,6 +150,7 @@ export default {
             color: #E91E63;
         }
     }
+    
     h4, h5, h6 {
         color: #444;
     }
@@ -195,17 +196,25 @@ export default {
     table {
         width: 100%;
         margin: 1rem 0;
-        color: #555;
+        color: #444;
+
+        thead {
+            background: #f1f1f1;
+        }
 
         th {
             text-align: left;
-            color: #999;
+            color: #888;
+            text-transform: capitalize;
+        }
+
+        tr:nth-child(2n) {
+            background-color: #f8f8f8;
         }
 
         td, th {
-            font-size: 1.05rem;
-            padding: .4rem 0rem;
-            border-bottom: 1px solid #eee;
+            font-size: 1.15rem;
+            padding: .5rem .6rem;
         }
     }
 
@@ -229,15 +238,17 @@ export default {
 
 code, kbd, pre, samp, tt {
     font-family: "Roboto Mono", Monaco, courier, monospace;
-    font-size: 12px;
-    background-color: #f8f8f8;
     -webkit-font-smoothing: initial;
     -moz-osx-font-smoothing: initial;
 }
+
 code {
     color: #28962c;
-    padding: 2px 7px;
-    margin: 0 2px;
-    border-radius: 2px;
+}
+
+pre {
+    max-height: 50em;
+    overflow: auto;
+    border-radius: 3px;
 }
 </style>
