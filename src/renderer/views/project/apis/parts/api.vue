@@ -1,62 +1,50 @@
 <template>
     <div class="api-info-box">
-        <div class="base-info-box">
-            <h3>
-                <span>基础信息</span>
+        <el-tabs v-model="activeTab">
+            <el-tab-pane label="基础信息" name="baseInfoTab">
+                <ul-list :data="list" :format="apiFormat"/>
                 <i class="el-icon-edit" title="编辑基础信息" @click="editApi"></i>
-            </h3>
-            <ul-list :data="list" :format="apiFormat"/>
-        </div>
-
-        <div class="headers-box">
-            <h3>
-                <span>请求头信息</span>
-            </h3>        
-        </div>
-
-        <div class="params-box">
-            <h3>
-                <span>请求参数信息</span>
+            </el-tab-pane>
+            <el-tab-pane label="请求头信息" name="second">
+                开发中...
+            </el-tab-pane>
+            <el-tab-pane label="请求参数信息" name="third">
+                <editList :header="tableHeader" v-model="data.params"/>
                 <i class="el-icon-plus" title="添加" @click="addNewParam"></i>
-            </h3>
-            <editList :header="tableHeader" v-model="data.params"/>
-        </div>
-
-        <div class="response-box">
-            <h3>
-                <span>响应信息</span>
+            </el-tab-pane>
+            <el-tab-pane label="响应信息" name="fourth">
                 <i class="el-icon-plus" title="添加" @click="toEditMock('response', true, data)"></i>
-            </h3>
-            <div class="radio-list-box">
-                <div class="mock-list-box" v-for="item in resList" :key="item._id">
-                    <header>
-                        <main>
-                            <p>
-                                <el-checkbox :value="item.used" @change="updateResCurrent(item)"></el-checkbox>
-                                <span class="name">{{item.name}}</span>
-                            </p>
-                            <p>
-                                <span>类型: {{item.type}}</span>
-                                <span :title="item.updatedAt">更新于: {{formatTime(item.updatedAt)}}</span>
-                            </p>
-                        </main>
-                        <aside>
-                            <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
-                            <i class="el-icon-delete" @click="delThisMock(item)"></i>
-                        </aside>
-                    </header>
-                    <marked class="marked-box" :value="getMarkedStr(item.json)"/>
+                <div class="radio-list-box">
+                    <div class="mock-list-box" v-for="item in resList" :key="item._id">
+                        <header>
+                            <main>
+                                <p>
+                                    <el-checkbox :value="item.used" @change="updateResCurrent(item)"></el-checkbox>
+                                    <span class="name">{{item.name}}</span>
+                                </p>
+                                <p>
+                                    <span>类型: {{item.type}}</span>
+                                    <span :title="item.updatedAt">更新于: {{formatTime(item.updatedAt)}}</span>
+                                </p>
+                            </main>
+                            <aside>
+                                <i class="el-icon-edit" title="编辑" @click="toEditMock('respinse', false, item)"></i>
+                                <i class="el-icon-delete" @click="delThisMock(item)"></i>
+                            </aside>
+                        </header>
+                        <marked class="marked-box" :value="getMarkedStr(item.json)"/>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </el-tab-pane>
+            <el-tab-pane label="代理" name="proxyTab">
+                <ProxyMod :project="project" :api="data"/>
+            </el-tab-pane>
 
-        <div class="headers-box">
-            <h3>
-                <span>测试</span>
-            </h3>        
-        </div>
+            <el-tab-pane label="测试" name="testTab">
+                开发中...
+            </el-tab-pane>
+        </el-tabs>
 
-        <ProxyMod :project="project" :api="data"/>
     </div>
 </template>
 
@@ -167,7 +155,8 @@ export default {
                 }
             ],
             // data.parmas 唯一对象
-            paramsUnique: []
+            paramsUnique: [],
+            activeTab: 'baseInfoTab'
         }
     },
     computed: {
@@ -377,6 +366,20 @@ export default {
 <style lang="scss" scoped>
 .api-info-box {
     margin: 0 10px;
+    height: 100%;
+    overflow: hidden;
+
+    /deep/ .el-tabs {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+
+        .el-tabs__content {
+            flex: 1;
+            overflow: auto;
+        }
+    }
 
     & > div {
         margin-bottom: 2em;
@@ -430,7 +433,7 @@ export default {
 .mock-list-box {
     header {
         position: sticky;
-        top: 31px;
+        top: 0px;
         z-index: 90;
         display: flex;
         flex-direction: row;
