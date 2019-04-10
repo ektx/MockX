@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-const requireComponent = require.context(
+const requireComponent = require.context( // eslint-disable-line
     // 其组件目录的相对路径
     '@/components',
     // 是否查询其子目录
